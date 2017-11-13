@@ -8,6 +8,11 @@
     <PropertyGroup>
         <RSG_Build_Version>1.1.0</RSG_Build_Version>
         <RSG_Conventions_Version>0.3.0</RSG_Conventions_Version>
+        <RSG_Hosting_Version>0.2.0</RSG_Hosting_Version>
+        <Microsoft_Extensions_Configuration_Version>2.0.0</Microsoft_Extensions_Configuration_Version>
+        <Microsoft_Extensions_DependencyInjection_Version>2.0.0</Microsoft_Extensions_DependencyInjection_Version>
+        <Microsoft_Extensions_Logging_Version>2.0.0</Microsoft_Extensions_Logging_Version>
+        <McMaster_Version>2.0.1</McMaster_Version>
         <SourceLink_Version>2.4.0</SourceLink_Version>
         <Microsoft_NET_Test_Sdk_Version>15.5.0-preview-20171031-01</Microsoft_NET_Test_Sdk_Version>
         <xunit_Version>2.3.1</xunit_Version>
@@ -15,6 +20,9 @@
         <FakeItEasy_Version>4.1.1</FakeItEasy_Version>
     </PropertyGroup>
     <!-- Overrides -->
-    <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.3' or '$(TargetFramework)'=='net451'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.6' or '$(TargetFramework)'=='net451'">
+        <Microsoft_Extensions_Configuration_Version>1.1.2</Microsoft_Extensions_Configuration_Version>
+        <Microsoft_Extensions_DependencyInjection_Version>1.1.1</Microsoft_Extensions_DependencyInjection_Version>
+        <Microsoft_Extensions_Logging_Version>1.1.2</Microsoft_Extensions_Logging_Version>
     </PropertyGroup>
 </Project>

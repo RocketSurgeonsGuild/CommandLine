@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard1.3;net451;netstandard2.0;net461</TargetFrameworks>
+        <TargetFrameworks>netstandard1.6;net451;netstandard2.0;net461</TargetFrameworks>
     </PropertyGroup>
 	<ItemGroup>
-	</ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0' or '$(TargetFramework)'=='net461'">
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3' or '$(TargetFramework)'=='net451'">
-        <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+	    <PackageReference Include="Rocket.Surgery.Conventions.Abstractions" Version="$(RSG_Conventions_Version)" />
+	    <PackageReference Include="Rocket.Surgery.Builders.Abstractions" Version="$(RSG_Conventions_Version)" />
+	    <PackageReference Include="Rocket.Surgery.Hosting.Abstractions" Version="$(RSG_Hosting_Version)" />
+	    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(Microsoft_Extensions_Configuration_Version)" />
+	    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(Microsoft_Extensions_DependencyInjection_Version)" />
+	    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMaster_Version)" />
     </ItemGroup>
 </Project>
