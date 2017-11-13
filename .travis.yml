@@ -4,18 +4,21 @@ dist: trusty
 mono: latest
 dotnet: 2.0.0
 os:
-  - linux
+- linux
 git:
   depth: 1
 cache:
   directories:
-    - tools
-    - $HOME/.nuget/packages
+  - tools
+  - "$HOME/.nuget/packages"
 before_cache:
-  - rm -f tools/packages.config
+- rm -f tools/packages.config
 script:
-  - git fetch --unshallow
-  - git fetch origin '+refs/heads/*:refs/heads/*'
-  - git branch -r
-  - chmod 755 ./build.sh
-  - ./build.sh --verbosity Diagnostic
+- git fetch --unshallow
+- git fetch origin '+refs/heads/*:refs/heads/*'
+- git branch -r
+- chmod 755 ./build.sh
+- "./build.sh --verbosity Diagnostic"
+notifications:
+  slack:
+    secure: AZ298f1qpjsChyEfjdLqkn9+cYI4aPfynEjRv7TbfSJcFfBlAoGe1yE2ks6FJE3hintLC9hHU2f++n2dAQ940SEG11O7v/9p8e0ylRB+3SaNCXvM9exN58y+IuhUuWnxaBtt2NZZOicqlkFSdgmVWDEAwuEC6twpN4TqmlI4jtfJ4mg4jAfqSVUlcSG7h50cmgb8i7xf79WP3lWqcODnE66SEdjJ4cg7kvn9qcfjivG9bNFKeo4tzvWRDfXEqPzoMbSpOcQoO4VbCPhuvr/spGqcLn+u+6GJ0KrkXutgEPLJHyYzYbofDOeQy85QekqXCI+mnL35kMH4ib4MDwxAJaWvfAakP3LVhpdb6sVb9oWogTCJ5RXPx5jIUV0l1YQATSJjwc2G+VS2D61D/UXvu83EK4P/FEda2tBgwZPahkPuBAuVgj9Ihig+h0hWJBWzp1e/3O3jKuPU7sK+NqD7bczFfNg/PJrUj0NYs2I+x5LqluLZGnwbXnlY5e7uN9XG0nRsl/C3ZQtT4V5H+UBZrbhIEW77QashgjNAiAPT93eLWVH9C0x0C4rGwD52LQwBpyHrPkLApjBHLDlhsTfy9E6hS6l7oi1YslU73MxoR90IhG6pAZbW0djor7kSiCEplHmVl7nlxePVd52jCMDWnTd7wiwyZjqfw7x3SKcsTio=
