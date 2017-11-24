@@ -4,7 +4,7 @@
     </PropertyGroup>
 	<ItemGroup>
 	    <PackageReference Include="Rocket.Surgery.Conventions.Abstractions" Version="$(RSG_Conventions_Version)" />
-	    <PackageReference Include="Rocket.Surgery.Builders.Abstractions" Version="$(RSG_Conventions_Version)" />
+	    <PackageReference Include="Rocket.Surgery.Builders.Abstractions" Version="$(RSG_Builders_Version)" />
 	    <PackageReference Include="Rocket.Surgery.Hosting.Abstractions" Version="$(RSG_Hosting_Version)" />
 	    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(Microsoft_Extensions_Configuration_Version)" />
 	    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMaster_Version)" />

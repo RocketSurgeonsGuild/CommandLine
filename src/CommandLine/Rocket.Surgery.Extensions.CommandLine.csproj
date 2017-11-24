@@ -7,6 +7,6 @@
     </ItemGroup>
 	<ItemGroup>
 	    <PackageReference Include="Rocket.Surgery.Conventions" Version="$(RSG_Conventions_Version)" />
-	    <PackageReference Include="Rocket.Surgery.Builders" Version="$(RSG_Conventions_Version)" />
+	    <PackageReference Include="Rocket.Surgery.Builders" Version="$(RSG_Builders_Version)" />
 	</ItemGroup>
 </Project>
