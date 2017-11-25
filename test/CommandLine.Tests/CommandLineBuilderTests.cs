@@ -7,13 +7,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
+using Rocket.Surgery.Extensions.Testing;
 using Rocket.Surgery.Hosting;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
-    public class CommandLineBuilderTests
+    public class CommandLineBuilderTests : AutoTestBase
     {
+        public CommandLineBuilderTests(ITestOutputHelper outputHelper) : base(outputHelper){}
+
         [Fact]
         public void Constructs()
         {
@@ -55,7 +59,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 configuration,
                 new CommandLineApplication());
 
-            Action a = () => builder.Build(A.Fake<ILogger>());
+            Action a = () => builder.Build(Logger);
             a.Should().NotThrow();
         }
 
@@ -81,7 +85,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 .Command("fetch", c => { })
                 .Command("origin", c => { });
 
-            var response = builder.Build(A.Fake<ILogger>());
+            var response = builder.Build(Logger);
 
             response.OptionHelp.Should().NotBeNull();
             child1.OptionHelp.Should().NotBeNull();
@@ -103,7 +107,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 configuration,
                 new CommandLineApplication());
 
-            var response = builder.Build(A.Fake<ILogger>(), typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder.Build(Logger, typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             Action a = () => response.ShowVersion();
             a.Should().NotThrow();
