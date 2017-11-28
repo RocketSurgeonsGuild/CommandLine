@@ -87,7 +87,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             var response = builder.Build(Logger);
 
-            response.OptionHelp.Should().NotBeNull();
+            response.Application.OptionHelp.Should().NotBeNull();
             child1.OptionHelp.Should().NotBeNull();
             child2.OptionHelp.Should().NotBeNull();
         }
@@ -109,7 +109,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             var response = builder.Build(Logger, typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            Action a = () => response.ShowVersion();
+            Action a = () => response.Application.ShowVersion();
             a.Should().NotThrow();
         }
     }

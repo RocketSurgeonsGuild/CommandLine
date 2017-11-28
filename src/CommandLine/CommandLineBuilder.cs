@@ -16,6 +16,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineBuilder : Builder, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly IConventionScanner _scanner;
+        public const int StopCode = -1337;
+        private readonly CommandOption _verbose;
+        private readonly CommandOption _trace;
+        private readonly CommandOption _debug;
 
         public CommandLineBuilder(
             IConventionScanner scanner,
@@ -31,6 +35,21 @@ namespace Rocket.Surgery.Extensions.CommandLine
             Environment = envionment;
             Configuration = configuration;
             Application = application;
+
+            Application.HelpOption();
+            _verbose = Application.Option("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
+            {
+                option.ShowInHelpText = true;
+            });
+            _trace = Application.Option("-t | --trace", "Trace logging", CommandOptionType.NoValue, option =>
+            {
+                option.ShowInHelpText = true;
+            });
+            _debug = Application.Option("-d | --debug", "Debug logging", CommandOptionType.NoValue, option =>
+            {
+                option.ShowInHelpText = true;
+            });
+            Application.OnExecute(() => StopCode);
         }
 
         public IAssemblyProvider AssemblyProvider { get; }
@@ -51,17 +70,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
-        public CommandLineApplication Build(ILogger logger, Assembly entryAssembly = null)
+        public CommandLineHandler Build(ILogger logger, Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = Assembly.GetEntryAssembly();
-            new ConventionComposer(_scanner, logger)
-                .Register(
-                    this,
-                    typeof(ICommandLineConventionContext),
-                    typeof(CommandLineConventionDelegate)
-                );
 
-            Application.HelpOption();
             Application.VersionOption(
                 "--version",
                 () => entryAssembly.GetCustomAttribute<AssemblyVersionAttribute>()?.Version,
@@ -69,12 +81,26 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     ?.InformationalVersion
             );
 
+            Application.Command("run", application =>
+            {
+                application.Description = "Run the application";
+                application.ExtendedHelpText = "Default action if no command is given";
+                application.OnExecute(() => StopCode);
+            });
+
+            new ConventionComposer(_scanner, logger)
+                .Register(
+                    this,
+                    typeof(ICommandLineConventionContext),
+                    typeof(CommandLineConventionDelegate)
+                );
+
             foreach (var command in Application.Commands)
             {
                 EnsureOptions(command);
             }
 
-            return Application;
+            return new CommandLineHandler(Application, StopCode, _verbose, _trace, _debug);
         }
 
         private static void EnsureOptions(CommandLineApplication command)
