@@ -13,7 +13,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// Logging Builder
     /// </summary>
-    public class CommandLineBuilder : Builder, ICommandLineBuilder, ICommandLineConventionContext
+    public class CommandLineBuilder : Builder, ICommandLineBuilder
     {
         private readonly IConventionScanner _scanner;
         public const int StopCode = -1337;
