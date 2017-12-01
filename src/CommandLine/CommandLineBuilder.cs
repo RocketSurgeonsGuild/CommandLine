@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -27,14 +28,16 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IAssemblyCandidateFinder assemblyCandidateFinder,
             IHostingEnvironment envionment,
             IConfiguration configuration,
-            CommandLineApplication application)
+            CommandLineApplication application,
+            ILogger logger)
         {
-            AssemblyProvider = assemblyProvider;
-            AssemblyCandidateFinder = assemblyCandidateFinder;
-            _scanner = scanner;
-            Environment = envionment;
-            Configuration = configuration;
-            Application = application;
+            AssemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
+            AssemblyCandidateFinder = assemblyCandidateFinder ?? throw new ArgumentNullException(nameof(assemblyCandidateFinder));
+            _scanner = scanner ?? throw new ArgumentNullException(nameof(scanner));
+            Environment = envionment ?? throw new ArgumentNullException(nameof(envionment));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Application = application ?? throw new ArgumentNullException(nameof(application));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             Application.HelpOption();
             _verbose = Application.Option("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
@@ -57,6 +60,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public IHostingEnvironment Environment { get; }
         public IConfiguration Configuration { get; }
         public CommandLineApplication Application { get; }
+        public ILogger Logger { get; }
 
         public ICommandLineBuilder AddDelegate(CommandLineConventionDelegate @delegate)
         {
@@ -70,7 +74,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
-        public CommandLineHandler Build(ILogger logger, Assembly entryAssembly = null)
+        public CommandLineHandler Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = Assembly.GetEntryAssembly();
 
@@ -88,7 +92,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 application.OnExecute(() => StopCode);
             });
 
-            new ConventionComposer(_scanner, logger)
+            new ConventionComposer(_scanner)
                 .Register(
                     this,
                     typeof(ICommandLineConventionContext),

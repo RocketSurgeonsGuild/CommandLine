@@ -21,21 +21,13 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         [Fact]
         public void Constructs()
         {
-            var assemblyProvider = new TestAssemblyProvider();
-            var assemblyCandidateFinder = A.Fake<IAssemblyCandidateFinder>();
-            var scanner = A.Fake<IConventionScanner>();
-            var configuration = A.Fake<IConfiguration>();
-            var builder = new CommandLineBuilder(
-                scanner,
-                assemblyProvider,
-                assemblyCandidateFinder,
-                A.Fake<IHostingEnvironment>(),
-                configuration,
-                new CommandLineApplication());
+            var assemblyProvider = AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder.AssemblyProvider.Should().BeSameAs(assemblyProvider);
             builder.AssemblyCandidateFinder.Should().NotBeNull();
-            builder.Configuration.Should().BeSameAs(configuration);
+            builder.Configuration.Should().BeSameAs(AutoFake.Resolve<IConfiguration>());
             builder.Environment.Should().NotBeNull();
             builder.Application.Should().NotBeNull();
             Action a = () => { builder.AddConvention(A.Fake<ICommandLineConvention>()); };
@@ -47,36 +39,20 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         [Fact]
         public void BuildsALogger()
         {
-            var assemblyProvider = new TestAssemblyProvider();
-            var assemblyCandidateFinder = A.Fake<IAssemblyCandidateFinder>();
-            var scanner = A.Fake<IConventionScanner>();
-            var configuration = A.Fake<IConfiguration>();
-            var builder = new CommandLineBuilder(
-                scanner,
-                assemblyProvider,
-                assemblyCandidateFinder,
-                A.Fake<IHostingEnvironment>(),
-                configuration,
-                new CommandLineApplication());
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            Action a = () => builder.Build(Logger);
+            Action a = () => builder.Build();
             a.Should().NotThrow();
         }
 
         [Fact]
         public void ShouldEnableHelpOnAllCommands()
         {
-            var assemblyProvider = new TestAssemblyProvider();
-            var assemblyCandidateFinder = A.Fake<IAssemblyCandidateFinder>();
-            var scanner = A.Fake<IConventionScanner>();
-            var configuration = A.Fake<IConfiguration>();
-            var builder = new CommandLineBuilder(
-                scanner,
-                assemblyProvider,
-                assemblyCandidateFinder,
-                A.Fake<IHostingEnvironment>(),
-                configuration,
-                new CommandLineApplication());
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var child1 = builder.Application
                 .Command("remote", c => { })
@@ -85,7 +61,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 .Command("fetch", c => { })
                 .Command("origin", c => { });
 
-            var response = builder.Build(Logger);
+            var response = builder.Build();
 
             response.Application.OptionHelp.Should().NotBeNull();
             child1.OptionHelp.Should().NotBeNull();
@@ -95,19 +71,11 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         [Fact]
         public void ShouldGetVersion()
         {
-            var assemblyProvider = new TestAssemblyProvider();
-            var assemblyCandidateFinder = A.Fake<IAssemblyCandidateFinder>();
-            var scanner = A.Fake<IConventionScanner>();
-            var configuration = A.Fake<IConfiguration>();
-            var builder = new CommandLineBuilder(
-                scanner,
-                assemblyProvider,
-                assemblyCandidateFinder,
-                A.Fake<IHostingEnvironment>(),
-                configuration,
-                new CommandLineApplication());
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder.Build(Logger, typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             Action a = () => response.Application.ShowVersion();
             a.Should().NotThrow();
