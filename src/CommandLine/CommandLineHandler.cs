@@ -6,31 +6,17 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineHandler
     {
         private readonly int _stopCode;
-        private readonly CommandOption _verbose;
-        private readonly CommandOption _trace;
-        private readonly CommandOption _debug;
+        private readonly CommandLineBuilder _builder;
 
-        public CommandLineHandler(CommandLineApplication application, int stopCode, CommandOption verbose, CommandOption trace, CommandOption debug)
+        public CommandLineHandler(CommandLineApplication application, int stopCode, CommandLineBuilder builder)
         {
             Application = application;
             _stopCode = stopCode;
-            _verbose = verbose;
-            _trace = trace;
-            _debug = debug;
+            _builder = builder;
         }
 
         public CommandLineApplication Application { get; }
-        public LogLevel LogLevel
-        {
-            get
-            {
-                if (_verbose.HasValue() || _trace.HasValue())
-                {
-                    return LogLevel.Trace;
-                }
-                return _debug.HasValue() ? LogLevel.Debug : LogLevel.Information;
-            }
-        }
+        public LogLevel LogLevel => _builder.LogLevel;
 
         public int? Execute(string[] args)
         {

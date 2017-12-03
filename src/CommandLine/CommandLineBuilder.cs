@@ -54,6 +54,13 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public IAssemblyProvider AssemblyProvider { get; }
         public IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
         public CommandLineApplication Application { get; }
+
+        private LogLevel? _logLevel;
+        public LogLevel LogLevel
+        {
+            get => _logLevel ?? LogLevel.Information;
+            set => _logLevel = value;
+        }
         public ILogger Logger { get; }
 
         public ICommandLineBuilder AddDelegate(CommandLineConventionDelegate @delegate)
@@ -98,7 +105,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 EnsureOptions(command);
             }
 
-            return new CommandLineHandler(Application, StopCode, _verbose, _trace, _debug);
+            return new CommandLineHandler(Application, StopCode, this);
         }
 
         private static void EnsureOptions(CommandLineApplication command)
