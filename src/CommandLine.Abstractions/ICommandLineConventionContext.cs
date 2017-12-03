@@ -10,8 +10,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
     {
         IAssemblyProvider AssemblyProvider { get; }
         IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
-        IHostingEnvironment Environment { get; }
-        IConfiguration Configuration { get; }
         CommandLineApplication Application { get; }
     }
 }

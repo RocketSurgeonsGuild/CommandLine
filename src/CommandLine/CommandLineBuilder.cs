@@ -26,16 +26,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
-            IHostingEnvironment envionment,
-            IConfiguration configuration,
             CommandLineApplication application,
             ILogger logger)
         {
             AssemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
             AssemblyCandidateFinder = assemblyCandidateFinder ?? throw new ArgumentNullException(nameof(assemblyCandidateFinder));
             _scanner = scanner ?? throw new ArgumentNullException(nameof(scanner));
-            Environment = envionment ?? throw new ArgumentNullException(nameof(envionment));
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Application = application ?? throw new ArgumentNullException(nameof(application));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -57,8 +53,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public IAssemblyProvider AssemblyProvider { get; }
         public IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
-        public IHostingEnvironment Environment { get; }
-        public IConfiguration Configuration { get; }
         public CommandLineApplication Application { get; }
         public ILogger Logger { get; }
 

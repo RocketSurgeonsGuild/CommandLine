@@ -27,8 +27,6 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             builder.AssemblyProvider.Should().BeSameAs(assemblyProvider);
             builder.AssemblyCandidateFinder.Should().NotBeNull();
-            builder.Configuration.Should().BeSameAs(AutoFake.Resolve<IConfiguration>());
-            builder.Environment.Should().NotBeNull();
             builder.Application.Should().NotBeNull();
             Action a = () => { builder.AddConvention(A.Fake<ICommandLineConvention>()); };
             a.Should().NotThrow();
