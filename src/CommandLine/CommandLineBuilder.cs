@@ -96,7 +96,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             new ConventionComposer(_scanner)
                 .Register(
                     this,
-                    typeof(ICommandLineConventionContext),
+                    typeof(ICommandLineConvention),
                     typeof(CommandLineConventionDelegate)
                 );
 
