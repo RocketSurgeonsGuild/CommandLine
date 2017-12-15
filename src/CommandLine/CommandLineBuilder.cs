@@ -21,6 +21,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
         private readonly CommandOption _verbose;
         private readonly CommandOption _trace;
         private readonly CommandOption _debug;
+        private readonly CommandOption _logLevel;
+        private LogLevel? _userLogLevel;
 
         public CommandLineBuilder(
             IConventionScanner scanner,
@@ -35,32 +37,38 @@ namespace Rocket.Surgery.Extensions.CommandLine
             Application = application ?? throw new ArgumentNullException(nameof(application));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            Application.HelpOption();
+            var help = Application.HelpOption();
+            help.Inherited = true;
+            help.ShowInHelpText = true;
             _verbose = Application.Option("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
+                option.Inherited = true;
             });
             _trace = Application.Option("-t | --trace", "Trace logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
+                option.Inherited = true;
             });
             _debug = Application.Option("-d | --debug", "Debug logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
+                option.Inherited = true;
             });
-            Application.OnExecute(() => StopCode);
+            _logLevel = Application.Option("-l | --loglevel <LogLevel>", "Log level", CommandOptionType.SingleValue, option =>
+            {
+                option.ShowInHelpText = true;
+                option.Description = $"The log level, valid levels are: Verbose, {string.Join(",", Enum.GetValues(typeof(LogLevel)))}";
+                option.Inherited = true;
+                option.ValueName = "LogLevel";
+                option.Validators.Add(new LogLevelValidator());
+            });
         }
 
         public IAssemblyProvider AssemblyProvider { get; }
         public IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
         public CommandLineApplication Application { get; }
-
-        private LogLevel? _logLevel;
-        public LogLevel LogLevel
-        {
-            get => _logLevel ?? LogLevel.Information;
-            set => _logLevel = value;
-        }
+        public LogLevel LogLevel { get => _userLogLevel ?? LogLevel.Information; set => _userLogLevel = value; }
         public ILogger Logger { get; }
 
         public ICommandLineBuilder AddDelegate(CommandLineConventionDelegate @delegate)
@@ -86,13 +94,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     ?.InformationalVersion
             );
 
-            Application.Command("run", application =>
-            {
-                application.Description = "Run the application";
-                application.ExtendedHelpText = "Default action if no command is given";
-                application.OnExecute(() => StopCode);
-            });
-
             new ConventionComposer(_scanner)
                 .Register(
                     this,
@@ -100,23 +101,17 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     typeof(CommandLineConventionDelegate)
                 );
 
-            foreach (var command in Application.Commands)
+            Application.OnExecute(() => StopCode);
+
+            Application.Command("run", a =>
             {
-                EnsureOptions(command);
-            }
+                a.Description = "Run the application";
+                a.ExtendedHelpText = "Default action if no command is given";
+                a.ShowInHelpText = true;
+                a.OnExecute(() => StopCode);
+            });
 
-            return new CommandLineHandler(Application, StopCode, this);
-        }
-
-        private static void EnsureOptions(CommandLineApplication command)
-        {
-            if (command.OptionHelp == null) command.HelpOption();
-            command.ShowInHelpText = true;
-
-            foreach (var subcommand in command.Commands)
-            {
-                EnsureOptions(subcommand);
-            }
+            return new CommandLineHandler(Application, StopCode, new LogLevelGetter(_verbose, _trace, _debug, _logLevel, _userLogLevel));
         }
     }
 }

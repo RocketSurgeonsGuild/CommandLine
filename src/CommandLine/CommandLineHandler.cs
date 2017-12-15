@@ -6,9 +6,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineHandler
     {
         private readonly int _stopCode;
-        private readonly CommandLineBuilder _builder;
+        private readonly LogLevelGetter _builder;
 
-        public CommandLineHandler(CommandLineApplication application, int stopCode, CommandLineBuilder builder)
+        internal CommandLineHandler(CommandLineApplication application, int stopCode, LogLevelGetter builder)
         {
             Application = application;
             _stopCode = stopCode;
@@ -18,7 +18,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public CommandLineApplication Application { get; }
         public LogLevel LogLevel => _builder.LogLevel;
 
-        public int? Execute(string[] args)
+        public int? Execute(params string[] args)
         {
             var result = Application.Execute(args);
             if (result == _stopCode) return null;

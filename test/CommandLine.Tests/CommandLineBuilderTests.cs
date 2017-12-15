@@ -53,17 +53,20 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var child1 = builder.Application
-                .Command("remote", c => { })
-                .Command("add", c => { });
+                .Command("remote", c => c.OnExecute(() => 1))
+                .Command("add", c => c.OnExecute(() => 1));
             var child2 = builder.Application
-                .Command("fetch", c => { })
-                .Command("origin", c => { });
+                .Command("fetch", c => c.OnExecute(() => 2))
+                .Command("origin", c => c.OnExecute(() => 2));
 
             var response = builder.Build();
 
             response.Application.OptionHelp.Should().NotBeNull();
-            child1.OptionHelp.Should().NotBeNull();
-            child2.OptionHelp.Should().NotBeNull();
+
+            response.Execute("remote", "add", "-v").Should().Be(1);
+            Logger.LogInformation(child2.GetHelpText());
+            child2.GetHelpText().Should().NotBeNullOrEmpty();
+            response.LogLevel.Should().Be(LogLevel.Trace);
         }
 
         [Fact]
@@ -77,6 +80,108 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             Action a = () => response.Application.ShowVersion();
             a.Should().NotThrow();
+        }
+
+        [Fact]
+        public void ExecuteWorks()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            response.Execute().Should().Be(null);
+        }
+
+        [Fact]
+        public void RunWorks()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            AutoFake.Provide(new CommandLineApplication());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            response.Execute("run").Should().Be(null);
+        }
+
+        [Theory]
+        [InlineData("-v", LogLevel.Trace)]
+        [InlineData("-t", LogLevel.Trace)]
+        [InlineData("-d", LogLevel.Debug)]
+        public void ShouldAllVerbosity(string command, LogLevel level)
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var cla = new CommandLineApplication();
+            AutoFake.Provide(cla);
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            cla.OnExecute(() => 0);
+            var result = response.Execute(command);
+            result.Should().Be(0);
+
+            response.LogLevel.Should().Be(level);
+        }
+
+        [Theory]
+        [InlineData("-l debug", LogLevel.Debug)]
+        [InlineData("-l verbose", LogLevel.Trace)]
+        [InlineData("-l nonE", LogLevel.None)]
+        [InlineData("-l Information", LogLevel.Information)]
+        [InlineData("-l Error", LogLevel.Error)]
+        [InlineData("-l WARNING", LogLevel.Warning)]
+        [InlineData("-l critical", LogLevel.Critical)]
+        public void ShouldAllowLogLevelIn(string command, LogLevel level)
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var cla = new CommandLineApplication();
+            AutoFake.Provide(cla);
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            cla.OnExecute(() => 0);
+            var result = response.Execute(command.Split(' '));
+            result.Should().Be(0);
+
+            response.LogLevel.Should().Be(level);
+        }
+
+        [Theory]
+        [InlineData("-l invalid")]
+        [InlineData("-l ")]
+        public void ShouldDisallowInvalidLogLevels(string command)
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var cla = new CommandLineApplication();
+            AutoFake.Provide(cla);
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            cla.OnExecute(() => 0);
+            response.Execute(command.Split(' ')).Should().Be(1);
+        }
+
+        [Fact]
+        public void DefaultToGivenLogLevel()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var cla = new CommandLineApplication();
+            AutoFake.Provide(cla);
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            builder.LogLevel = LogLevel.None;
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            cla.OnExecute(() => 0);
+            var result = response.Execute();
+            result.Should().Be(0);
+
+            response.LogLevel.Should().Be(LogLevel.None);
         }
     }
 }
