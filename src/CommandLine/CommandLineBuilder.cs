@@ -103,7 +103,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
             Application.OnExecute(() => StopCode);
 
-            Application.Command("run", a =>
+            var run = Application.Command("run", a =>
             {
                 a.Description = "Run the application";
                 a.ExtendedHelpText = "Default action if no command is given";
@@ -111,7 +111,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 a.OnExecute(() => StopCode);
             });
 
-            return new CommandLineHandler(Application, StopCode, new LogLevelGetter(_verbose, _trace, _debug, _logLevel, _userLogLevel));
+            return new CommandLineHandler(Application, StopCode, new LogLevelGetter(_verbose, _trace, _debug, _logLevel, _userLogLevel), run);
         }
     }
 }

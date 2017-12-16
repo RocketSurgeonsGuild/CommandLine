@@ -41,8 +41,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     return LogLevel.Trace;
                 if (_debug.HasValue())
                     return LogLevel.Debug;
-                if (_userLogLevel.HasValue) return _userLogLevel.Value;
-                return LogLevel.Information;
+                return _userLogLevel ?? LogLevel.Information;
             }
         }
     }
