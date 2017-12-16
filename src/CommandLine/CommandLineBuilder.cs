@@ -37,9 +37,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             Application = application ?? throw new ArgumentNullException(nameof(application));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            var help = Application.HelpOption();
-            help.Inherited = true;
-            help.ShowInHelpText = true;
             _verbose = Application.Option("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
@@ -111,7 +108,18 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 a.OnExecute(() => StopCode);
             });
 
+            EnsureHelp(Application);
+
             return new CommandLineHandler(Application, StopCode, new LogLevelGetter(_verbose, _trace, _debug, _logLevel, _userLogLevel), run);
+        }
+
+        void EnsureHelp(CommandLineApplication application)
+        {
+            application.HelpOption();
+            foreach (var a in application.Commands)
+            {
+                EnsureHelp(a);
+            }
         }
     }
 }

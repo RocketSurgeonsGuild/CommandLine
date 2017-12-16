@@ -1,4 +1,5 @@
-﻿using McMaster.Extensions.CommandLineUtils;
+﻿using System.Linq;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
@@ -23,8 +24,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public int? Execute(params string[] args)
         {
             var result = Application.Execute(args);
-            if (result == _stopCode || _run.IsShowingInformation || Application.IsShowingInformation) return null;
+            if (IsShowingInformation(Application)) return 0;
+            if (result == _stopCode) return null;
             return result;
+        }
+
+        private bool IsShowingInformation(CommandLineApplication application)
+        {
+            return application.IsShowingInformation || application.Commands.Any(IsShowingInformation);
         }
     }
 }

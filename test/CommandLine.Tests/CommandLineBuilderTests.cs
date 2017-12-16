@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using FakeItEasy;
 using FluentAssertions;
@@ -16,7 +17,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
     public class CommandLineBuilderTests : AutoTestBase
     {
-        public CommandLineBuilderTests(ITestOutputHelper outputHelper) : base(outputHelper){}
+        public CommandLineBuilderTests(ITestOutputHelper outputHelper) : base(outputHelper) { }
 
         [Fact]
         public void Constructs()
@@ -182,6 +183,85 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             result.Should().Be(0);
 
             response.LogLevel.Should().Be(LogLevel.None);
+        }
+
+        [Theory]
+        [InlineData("--version")]
+        [InlineData("--help")]
+        [InlineData("run --help")]
+        [InlineData("cmd1 --help")]
+        [InlineData("cmd1 a --help")]
+        [InlineData("cmd1 b --help")]
+        [InlineData("cmd1 c --help")]
+        [InlineData("cmd1 d --help")]
+        [InlineData("cmd1 e --help")]
+        [InlineData("cmd2 --help")]
+        [InlineData("cmd2 a --help")]
+        [InlineData("cmd2 b --help")]
+        [InlineData("cmd2 c --help")]
+        [InlineData("cmd2 d --help")]
+        [InlineData("cmd2 e --help")]
+        [InlineData("cmd3 --help")]
+        [InlineData("cmd3 a --help")]
+        [InlineData("cmd3 b --help")]
+        [InlineData("cmd3 c --help")]
+        [InlineData("cmd3 d --help")]
+        [InlineData("cmd3 e --help")]
+        [InlineData("cmd4 --help")]
+        [InlineData("cmd4 a --help")]
+        [InlineData("cmd4 b --help")]
+        [InlineData("cmd4 c --help")]
+        [InlineData("cmd4 d --help")]
+        [InlineData("cmd4 e --help")]
+        [InlineData("cmd5 --help")]
+        [InlineData("cmd5 a --help")]
+        [InlineData("cmd5 b --help")]
+        [InlineData("cmd5 c --help")]
+        [InlineData("cmd5 d --help")]
+        [InlineData("cmd5 e --help")]
+        public void StopsForHelp(string command)
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var cla = new CommandLineApplication();
+            AutoFake.Provide(cla);
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var cmd1 = cla.Command("cmd1", application => application.OnExecute(() => -1));
+            cmd1.Command("a", application => application.OnExecute(() => -1));
+            cmd1.Command("b", application => application.OnExecute(() => -1));
+            cmd1.Command("c", application => application.OnExecute(() => -1));
+            cmd1.Command("d", application => application.OnExecute(() => -1));
+            cmd1.Command("e", application => application.OnExecute(() => -1));
+            var cmd2 = cla.Command("cmd2", application => application.OnExecute(() => -1));
+            cmd2.Command("a", application => application.OnExecute(() => -1));
+            cmd2.Command("b", application => application.OnExecute(() => -1));
+            cmd2.Command("c", application => application.OnExecute(() => -1));
+            cmd2.Command("d", application => application.OnExecute(() => -1));
+            cmd2.Command("e", application => application.OnExecute(() => -1));
+            var cmd3 = cla.Command("cmd3", application => application.OnExecute(() => -1));
+            cmd3.Command("a", application => application.OnExecute(() => -1));
+            cmd3.Command("b", application => application.OnExecute(() => -1));
+            cmd3.Command("c", application => application.OnExecute(() => -1));
+            cmd3.Command("d", application => application.OnExecute(() => -1));
+            cmd3.Command("e", application => application.OnExecute(() => -1));
+            var cmd4 = cla.Command("cmd4", application => application.OnExecute(() => -1));
+            cmd4.Command("a", application => application.OnExecute(() => -1));
+            cmd4.Command("b", application => application.OnExecute(() => -1));
+            cmd4.Command("c", application => application.OnExecute(() => -1));
+            cmd4.Command("d", application => application.OnExecute(() => -1));
+            cmd4.Command("e", application => application.OnExecute(() => -1));
+            var cmd5 = cla.Command("cmd5", application => application.OnExecute(() => -1));
+            cmd5.Command("a", application => application.OnExecute(() => -1));
+            cmd5.Command("b", application => application.OnExecute(() => -1));
+            cmd5.Command("c", application => application.OnExecute(() => -1));
+            cmd5.Command("d", application => application.OnExecute(() => -1));
+            cmd5.Command("e", application => application.OnExecute(() => -1));
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            cla.OnExecute(() => 0);
+            var result = response.Execute(command.Split(' '));
+            result.Should().Be(0);
         }
     }
 }
