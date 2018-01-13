@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using McMaster.Extensions.CommandLineUtils;
