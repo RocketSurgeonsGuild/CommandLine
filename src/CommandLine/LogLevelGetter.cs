@@ -7,12 +7,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
     class LogLevelGetter
     {
         private readonly LogLevel? _userLogLevel;
-        private readonly CommandOption<bool> _verbose;
-        private readonly CommandOption<bool> _trace;
-        private readonly CommandOption<bool> _debug;
+        private readonly CommandOption _verbose;
+        private readonly CommandOption _trace;
+        private readonly CommandOption _debug;
         private readonly CommandOption<LogLevel> _logLevel;
 
-        public LogLevelGetter(CommandOption<bool> verbose, CommandOption<bool> trace, CommandOption<bool> debug, CommandOption<LogLevel> logLevel, LogLevel? userLogLevel)
+        public LogLevelGetter(CommandOption verbose, CommandOption trace, CommandOption debug, CommandOption<LogLevel> logLevel, LogLevel? userLogLevel)
         {
             _userLogLevel = userLogLevel;
             _verbose = verbose ?? throw new ArgumentNullException(nameof(verbose));
