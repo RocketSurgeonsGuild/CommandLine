@@ -130,7 +130,6 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
         [Theory]
         [InlineData("-l debug", LogLevel.Debug)]
-        [InlineData("-l verbose", LogLevel.Trace)]
         [InlineData("-l nonE", LogLevel.None)]
         [InlineData("-l Information", LogLevel.Information)]
         [InlineData("-l Error", LogLevel.Error)]
@@ -165,7 +164,8 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             cla.OnExecute(() => 0);
-            response.Execute(command.Split(' ')).Should().Be(1);
+            Action a = () => response.Execute(command.Split(' '));
+            a.Should().Throw<CommandParsingException>();
         }
 
         [Fact]

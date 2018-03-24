@@ -18,10 +18,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
     {
         private readonly IConventionScanner _scanner;
         public const int StopCode = -1337;
-        private readonly CommandOption _verbose;
-        private readonly CommandOption _trace;
-        private readonly CommandOption _debug;
-        private readonly CommandOption _logLevel;
+        private readonly CommandOption<bool> _verbose;
+        private readonly CommandOption<bool> _trace;
+        private readonly CommandOption<bool> _debug;
+        private readonly CommandOption<LogLevel> _logLevel;
         private LogLevel? _userLogLevel;
 
         public CommandLineBuilder(
@@ -37,25 +37,25 @@ namespace Rocket.Surgery.Extensions.CommandLine
             Application = application ?? throw new ArgumentNullException(nameof(application));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _verbose = Application.Option("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
+            _verbose = Application.Option<bool>("-v | --verbose", "Verbose logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
                 option.Inherited = true;
             });
-            _trace = Application.Option("-t | --trace", "Trace logging", CommandOptionType.NoValue, option =>
+            _trace = Application.Option<bool>("-t | --trace", "Trace logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
                 option.Inherited = true;
             });
-            _debug = Application.Option("-d | --debug", "Debug logging", CommandOptionType.NoValue, option =>
+            _debug = Application.Option<bool>("-d | --debug", "Debug logging", CommandOptionType.NoValue, option =>
             {
                 option.ShowInHelpText = true;
                 option.Inherited = true;
             });
-            _logLevel = Application.Option("-l | --loglevel <LogLevel>", "Log level", CommandOptionType.SingleValue, option =>
+            _logLevel = Application.Option<LogLevel>("-l | --loglevel <LogLevel>", "Log level", CommandOptionType.SingleValue, option =>
             {
                 option.ShowInHelpText = true;
-                option.Description = $"The log level, valid levels are: Verbose, {string.Join(",", Enum.GetValues(typeof(LogLevel)))}";
+                option.Description = $"The log level, valid levels are: {string.Join(",", Enum.GetValues(typeof(LogLevel)))}";
                 option.Inherited = true;
                 option.ValueName = "LogLevel";
                 option.Validators.Add(new LogLevelValidator());

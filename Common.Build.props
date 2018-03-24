@@ -13,7 +13,7 @@
         <Microsoft_Extensions_Configuration_Version>2.0.0</Microsoft_Extensions_Configuration_Version>
         <Microsoft_Extensions_DependencyInjection_Version>2.0.0</Microsoft_Extensions_DependencyInjection_Version>
         <Microsoft_Extensions_Logging_Version>2.0.0</Microsoft_Extensions_Logging_Version>
-        <McMaster_Version>2.1.1</McMaster_Version>
+        <McMaster_Version>2.2.0-rc</McMaster_Version>
         <SourceLink_Version>2.8.0</SourceLink_Version>
         <Microsoft_NET_Test_Sdk_Version>15.6.1</Microsoft_NET_Test_Sdk_Version>
         <xunit_Version>2.3.1</xunit_Version>
