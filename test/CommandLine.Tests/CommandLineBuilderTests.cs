@@ -30,9 +30,13 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             builder.AssemblyProvider.Should().BeSameAs(assemblyProvider);
             builder.AssemblyCandidateFinder.Should().NotBeNull();
             builder.Application.Should().NotBeNull();
-            Action a = () => { builder.AddConvention(A.Fake<ICommandLineConvention>()); };
+            Action a = () => { builder.PrependConvention(A.Fake<ICommandLineConvention>()); };
             a.Should().NotThrow();
-            a = () => { builder.AddDelegate(delegate { }); };
+            a = () => { builder.AppendConvention(A.Fake<ICommandLineConvention>()); };
+            a.Should().NotThrow();
+            a = () => { builder.PrependDelegate(delegate { }); };
+            a.Should().NotThrow();
+            a = () => { builder.AppendDelegate(delegate { }); };
             a.Should().NotThrow();
         }
 

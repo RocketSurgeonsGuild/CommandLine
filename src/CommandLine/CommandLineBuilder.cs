@@ -15,9 +15,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// Logging Builder
     /// </summary>
-    public class CommandLineBuilder : Builder, ICommandLineBuilder
+    public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
     {
-        private readonly IConventionScanner _scanner;
         public const int StopCode = -1337;
         private readonly CommandOption<bool> _verbose;
         private readonly CommandOption<bool> _trace;
@@ -30,11 +29,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
             CommandLineApplication application,
-            ILogger logger)
+            ILogger logger) : base(scanner, assemblyProvider, assemblyCandidateFinder)
         {
-            AssemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
-            AssemblyCandidateFinder = assemblyCandidateFinder ?? throw new ArgumentNullException(nameof(assemblyCandidateFinder));
-            _scanner = scanner ?? throw new ArgumentNullException(nameof(scanner));
             Application = application ?? throw new ArgumentNullException(nameof(application));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -63,23 +59,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
             });
         }
 
-        public IAssemblyProvider AssemblyProvider { get; }
-        public IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
+        protected override ICommandLineBuilder GetBuilder() => this;
+
         public CommandLineApplication Application { get; }
         public LogLevel LogLevel { get => _userLogLevel ?? LogLevel.Information; set => _userLogLevel = value; }
         public ILogger Logger { get; }
-
-        public ICommandLineBuilder AddDelegate(CommandLineConventionDelegate @delegate)
-        {
-            _scanner.AddDelegate(@delegate);
-            return this;
-        }
-
-        public ICommandLineBuilder AddConvention(ICommandLineConvention convention)
-        {
-            _scanner.AddConvention(convention);
-            return this;
-        }
 
         public CommandLineHandler Build(Assembly entryAssembly = null)
         {
@@ -92,7 +76,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     ?.InformationalVersion
             );
 
-            new ConventionComposer(_scanner)
+            new ConventionComposer(Scanner)
                 .Register(
                     this,
                     typeof(ICommandLineConvention),
