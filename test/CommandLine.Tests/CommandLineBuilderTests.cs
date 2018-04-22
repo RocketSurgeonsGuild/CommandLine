@@ -243,10 +243,35 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
             A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
-            builder.WithServiceProvider(() => serviceProvider);
+            builder.WithServiceProvider(x => serviceProvider);
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             var result = response.Execute();
+
+            result.Should().Be(1000);
+        }
+
+        [Fact]
+        public void SupportsAppllicationStateWithCustomDependencyInjection()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
+
+            var service = A.Fake<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            var serviceProvider = A.Fake<IServiceProvider>();
+
+            A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
+            A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
+            builder.WithServiceProvider(x =>
+            {
+                x.GetLogLevel().Should().Be(LogLevel.Error);
+                return serviceProvider;
+            });
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute("--log", "error");
 
             result.Should().Be(1000);
         }

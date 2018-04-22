@@ -25,7 +25,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
-        private Func<IServiceProvider> _serviceProviderFactory;
+        private Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
 
         public CommandLineBuilder(
             IConventionScanner scanner,
@@ -53,7 +53,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public ILogger Logger { get; }
 
-        public CommandLineBuilder<T> WithServiceProvider(Func<IServiceProvider> serviceProviderFactory)
+        public CommandLineBuilder<T> WithServiceProvider(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
         {
             _serviceProviderFactory = serviceProviderFactory;
             return this;

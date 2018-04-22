@@ -10,14 +10,15 @@ namespace Rocket.Surgery.Extensions.CommandLine
     class CommandLineServiceProvider : IServiceProvider
     {
         private readonly IModelAccessor _modelAccessor;
-        private readonly Lazy<IServiceProvider> _serviceProvider;
+        private readonly Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
+        private IServiceProvider _serviceProvider;
         private readonly List<(Type serviceType, object serviceValue)> _services;
 
-        public CommandLineServiceProvider(IModelAccessor modelAccessor, List<(Type serviceType, object serviceValue)> services, Func<IServiceProvider> serviceProviderFactory)
+        public CommandLineServiceProvider(IModelAccessor modelAccessor, List<(Type serviceType, object serviceValue)> services, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
         {
             _modelAccessor = modelAccessor ?? throw new ArgumentNullException(nameof(modelAccessor));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            if (serviceProviderFactory != null) _serviceProvider = new Lazy<IServiceProvider>(serviceProviderFactory);
+            _serviceProviderFactory = serviceProviderFactory;
         }
 
         public object GetService(Type serviceType)
@@ -37,9 +38,17 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return PhysicalConsole.Singleton;
             }
 
-            return 
-                _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue ??
-                _serviceProvider?.Value.GetService(serviceType);
+            var givenService = _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue;
+            if (givenService != null) return givenService;
+
+            if (_serviceProviderFactory == null) return null;
+
+            if (_serviceProvider == null)
+            {
+                _serviceProvider = _serviceProviderFactory(_modelAccessor.GetModel() as IApplicationState);
+            }
+
+            return _serviceProvider.GetService(serviceType);
         }
     }
 }
