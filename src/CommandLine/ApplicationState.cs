@@ -8,7 +8,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     [Command, Subcommand("run", typeof(RunApplication))]
     public class ApplicationState<T> : IApplicationStateInner
-        where T : ApplicationCore
+        where T : class, ICommandLineDefault
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -16,7 +16,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
         {
             _serviceProvider = serviceProvider;
         }
-        public Task<int> OnExecuteAsync() => ActivatorUtilities.CreateInstance<T>(_serviceProvider, this as IApplicationState).OnExecuteAsync();
+        public Task<int> OnExecuteAsync()
+        {
+            return _serviceProvider.GetService<T>()?.OnExecuteAsync(this) ??
+                   ActivatorUtilities.CreateInstance<T>(_serviceProvider, this as IApplicationState).OnExecuteAsync(this);
+        }
 
         [Option(CommandOptionType.NoValue, Description = "Verbose logging", Inherited = true, ShowInHelpText = true)]
         public bool Verbose { get; }

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     public class CommandLineHandler<T>
-        where T : ApplicationCore
+        where T : class, ICommandLineDefault
     {
         public CommandLineApplication<ApplicationState<T>> Application { get; }
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
@@ -9,10 +11,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
     {
         private readonly IModelAccessor _modelAccessor;
         private readonly Lazy<IServiceProvider> _serviceProvider;
+        private readonly List<(Type serviceType, object serviceValue)> _services;
 
-        public CommandLineServiceProvider(IModelAccessor modelAccessor, Func<IServiceProvider> serviceProviderFactory)
+        public CommandLineServiceProvider(IModelAccessor modelAccessor, List<(Type serviceType, object serviceValue)> services, Func<IServiceProvider> serviceProviderFactory)
         {
             _modelAccessor = modelAccessor ?? throw new ArgumentNullException(nameof(modelAccessor));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
             if (serviceProviderFactory != null) _serviceProvider = new Lazy<IServiceProvider>(serviceProviderFactory);
         }
 
@@ -33,7 +37,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return PhysicalConsole.Singleton;
             }
 
-            return _serviceProvider?.Value.GetService(serviceType);
+            return 
+                _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue ??
+                _serviceProvider?.Value.GetService(serviceType);
         }
     }
 }

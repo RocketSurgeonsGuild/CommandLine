@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -18,9 +19,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// Logging Builder
     /// </summary>
     public class CommandLineBuilder<T> : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
-        where T : ApplicationCore
+        where T : class, ICommandLineDefault
     {
         private readonly CommandLineApplication<ApplicationState<T>> _application;
+
+        private readonly List<(Type serviceType, object serviceValue)> _services =
+            new List<(Type serviceType, object serviceValue)>();
         private Func<IServiceProvider> _serviceProviderFactory;
 
         public CommandLineBuilder(
@@ -55,6 +59,18 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
+        public CommandLineBuilder<T> WithService<S>(S value)
+        {
+            _services.Add((typeof(S), value));
+            return this;
+        }
+
+        public CommandLineBuilder<T> WithDefaultCommand(T value)
+        {
+            _services.Add((typeof(T), value));
+            return this;
+        }
+
         public CommandLineHandler<T> Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = typeof(T).GetTypeInfo().Assembly;
@@ -70,7 +86,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 .UseDefaultConventions()
                 .AddConvention(new DefaultHelpOptionConvention())
                 .AddConvention(new VersionConvention(entryAssembly))
-                .UseConstructorInjection(new CommandLineServiceProvider(_application, _serviceProviderFactory));
+                .UseConstructorInjection(new CommandLineServiceProvider(_application, _services, _serviceProviderFactory));
 
             return new CommandLineHandler<T>(_application);
         }

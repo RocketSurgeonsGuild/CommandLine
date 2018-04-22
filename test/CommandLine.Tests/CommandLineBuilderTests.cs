@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
-    class Application : ApplicationCore
+    class Application : ICommandLineDefault
     {
         private readonly IApplicationState _applicationState;
 
@@ -26,25 +26,23 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             _applicationState = applicationState;
         }
 
-        public override async Task<int> OnExecuteAsync()
+        public async Task<int> OnExecuteAsync(IApplicationState state)
         {
             await Task.Yield();
             return (int)_applicationState.GetLogLevel();
         }
     }
 
-    class ServiceApplication : ApplicationCore
+    public class ServiceApplication : ICommandLineDefault
     {
-        private readonly IApplicationState _applicationState;
         private readonly IService _service;
 
-        public ServiceApplication(IApplicationState applicationState, IService service)
+        public ServiceApplication(IApplicationState state, IService service)
         {
-            _applicationState = applicationState;
             _service = service;
         }
 
-        public override async Task<int> OnExecuteAsync()
+        public async Task<int> OnExecuteAsync(IApplicationState state)
         {
             await Task.Yield();
             return _service.ReturnCode;
@@ -240,9 +238,46 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             var service = A.Fake<IService>();
             A.CallTo(() => service.ReturnCode).Returns(1000);
+
             var serviceProvider = A.Fake<IServiceProvider>();
-            A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service);
+
+            A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
+            A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
             builder.WithServiceProvider(() => serviceProvider);
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute();
+
+            result.Should().Be(1000);
+        }
+
+        [Fact]
+        public void SupportsCustomServices()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
+
+            var service = A.Fake<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            builder.WithService(service);
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute();
+
+            result.Should().Be(1000);
+        }
+
+        [Fact]
+        public void SupportsGivenCommandLineDefault()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
+
+            var service = A.Fake<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            builder.WithDefaultCommand(new ServiceApplication(null, service));
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             var result = response.Execute();
