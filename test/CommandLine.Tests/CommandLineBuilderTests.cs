@@ -19,18 +19,18 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
     class Application : ICommandLineDefault
     {
-        private readonly IApplicationState _applicationState;
-
         public Application(IApplicationState applicationState)
         {
-            _applicationState = applicationState;
         }
 
-        public async Task<int> OnExecuteAsync(IApplicationState state)
+        public async Task<int> OnExecuteAsync(IApplicationState state, string[] args)
         {
             await Task.Yield();
-            return (int)_applicationState.GetLogLevel();
+            RemainingArguments = args;
+            return (int)state.GetLogLevel();
         }
+
+        public string[] RemainingArguments { get; private set; }
     }
 
     public class ServiceApplication : ICommandLineDefault
@@ -42,7 +42,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             _service = service;
         }
 
-        public async Task<int> OnExecuteAsync(IApplicationState state)
+        public async Task<int> OnExecuteAsync(IApplicationState state, string[] args)
         {
             await Task.Yield();
             return _service.ReturnCode;
@@ -283,6 +283,36 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var result = response.Execute();
 
             result.Should().Be(1000);
+        }
+
+        [Fact]
+        public void DumpsOutRemainingArgumentsForDefault()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var application = new Application(null);
+            builder.WithDefaultCommand(application);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute("someone", "likes", "--pie");
+
+            application.RemainingArguments.Should().ContainInOrder("someone", "likes", "--pie");
+        }
+
+        [Fact]
+        public void DumpsOutRemainingArgumentsForRun()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var application = new Application(null);
+            builder.WithDefaultCommand(application);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute("run", "someone", "--likes", "pie");
+
+            application.RemainingArguments.Should().ContainInOrder("someone", "--likes", "pie");
         }
     }
 }

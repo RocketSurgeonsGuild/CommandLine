@@ -4,6 +4,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     public interface ICommandLineDefault
     {   
-        Task<int> OnExecuteAsync(IApplicationState state);
+        Task<int> OnExecuteAsync(IApplicationState state, string[] remainingArguments);
     }
 }

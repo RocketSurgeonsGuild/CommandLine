@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    [Command, Subcommand("run", typeof(RunApplication))]
+    [Command(ThrowOnUnexpectedArgument = false), Subcommand("run", typeof(RunApplication))]
     public class ApplicationState<T> : IApplicationStateInner
         where T : class, ICommandLineDefault
     {
@@ -18,9 +18,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
         }
         public Task<int> OnExecuteAsync()
         {
-            return _serviceProvider.GetService<T>()?.OnExecuteAsync(this) ??
-                   ActivatorUtilities.CreateInstance<T>(_serviceProvider, this as IApplicationState).OnExecuteAsync(this);
+            return _serviceProvider.GetService<T>()?.OnExecuteAsync(this, RemainingArguments) ??
+                   ActivatorUtilities.CreateInstance<T>(_serviceProvider, this as IApplicationState).OnExecuteAsync(this, RemainingArguments);
         }
+
+        public string[] RemainingArguments { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Verbose logging", Inherited = true, ShowInHelpText = true)]
         public bool Verbose { get; }
