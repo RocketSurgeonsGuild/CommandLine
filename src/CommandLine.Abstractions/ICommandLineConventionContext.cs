@@ -1,4 +1,6 @@
+using System;
 using McMaster.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Rocket.Surgery.Conventions;
@@ -11,7 +13,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     {
         IAssemblyProvider AssemblyProvider { get; }
         IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
-        CommandLineApplication Application { get; }
-        LogLevel LogLevel { get; set; }
+        IConventionBuilder CommandLineApplicationConventions { get; }
+        ICommandLineConventionContext AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true) where T : class;
     }
 }

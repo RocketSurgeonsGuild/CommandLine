@@ -4,34 +4,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    public class CommandLineHandler
+    public class CommandLineHandler<T>
+        where T : ApplicationCore
     {
-        private readonly int _stopCode;
-        private readonly LogLevelGetter _builder;
-        private readonly CommandLineApplication _run;
+        public CommandLineApplication<ApplicationState<T>> Application { get; }
 
-        internal CommandLineHandler(CommandLineApplication application, int stopCode, LogLevelGetter builder, CommandLineApplication run)
+        internal CommandLineHandler(CommandLineApplication<ApplicationState<T>> application)
         {
             Application = application;
-            _stopCode = stopCode;
-            _builder = builder;
-            _run = run;
         }
 
-        public CommandLineApplication Application { get; }
-        public LogLevel LogLevel => _builder.LogLevel;
-
-        public int? Execute(params string[] args)
+        public int Execute(params string[] args)
         {
-            var result = Application.Execute(args);
-            if (IsShowingInformation(Application)) return 0;
-            if (result == _stopCode) return null;
-            return result;
-        }
-
-        private bool IsShowingInformation(CommandLineApplication application)
-        {
-            return application.IsShowingInformation || application.Commands.Any(IsShowingInformation);
+            return Application.Execute(args);
         }
     }
 }

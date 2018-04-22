@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
@@ -16,6 +17,42 @@ using Xunit.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
+    class Application : ApplicationCore
+    {
+        private readonly IApplicationState _applicationState;
+
+        public Application(IApplicationState applicationState)
+        {
+            _applicationState = applicationState;
+        }
+
+        public override async Task<int> OnExecuteAsync()
+        {
+            await Task.Yield();
+            return (int)_applicationState.GetLogLevel();
+        }
+    }
+
+    class ServiceApplication : ApplicationCore
+    {
+        private readonly IApplicationState _applicationState;
+        private readonly IService _service;
+
+        public ServiceApplication(IApplicationState applicationState, IService service)
+        {
+            _applicationState = applicationState;
+            _service = service;
+        }
+
+        public override async Task<int> OnExecuteAsync()
+        {
+            await Task.Yield();
+            return _service.ReturnCode;
+        }
+    }
+
+    public interface IService { int ReturnCode { get; } }
+
     public class CommandLineBuilderTests : AutoTestBase
     {
         public CommandLineBuilderTests(ITestOutputHelper outputHelper) : base(outputHelper) { }
@@ -24,12 +61,10 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void Constructs()
         {
             var assemblyProvider = AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             builder.AssemblyProvider.Should().BeSameAs(assemblyProvider);
             builder.AssemblyCandidateFinder.Should().NotBeNull();
-            builder.Application.Should().NotBeNull();
             Action a = () => { builder.PrependConvention(A.Fake<ICommandLineConvention>()); };
             a.Should().NotThrow();
             a = () => { builder.AppendConvention(A.Fake<ICommandLineConvention>()); };
@@ -44,43 +79,47 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void BuildsALogger()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             Action a = () => builder.Build();
             a.Should().NotThrow();
         }
 
+        [Command(), Subcommand("add", typeof(Add))]
+        class Remote { public int OnExecute() => 1; }
+
+        [Command()]
+        class Add { public int OnExecute() => 1; }
+
+        [Command(), Subcommand("origin", typeof(Origin))]
+        class Fetch { public int OnExecute() => 2; }
+
+        [Command()]
+        class Origin { public int OnExecute() => 2; }
+
         [Fact]
         public void ShouldEnableHelpOnAllCommands()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
-            var child1 = builder.Application
-                .Command("remote", c => c.OnExecute(() => 1))
-                .Command("add", c => c.OnExecute(() => 1));
-            var child2 = builder.Application
-                .Command("fetch", c => c.OnExecute(() => 2))
-                .Command("origin", c => c.OnExecute(() => 2));
+            builder.AddCommand<Remote>("remote");
+            builder.AddCommand<Fetch>("fetch");
 
             var response = builder.Build();
 
             response.Application.OptionHelp.Should().NotBeNull();
 
             response.Execute("remote", "add", "-v").Should().Be(1);
-            Logger.LogInformation(child2.GetHelpText());
-            child2.GetHelpText().Should().NotBeNullOrEmpty();
-            response.LogLevel.Should().Be(LogLevel.Trace);
+            Logger.LogInformation(response.Application.Commands.Find(x => x.Name == "remote").GetHelpText());
+            response.Application.Commands.Find(x => x.Name == "fetch").GetHelpText().Should().NotBeNullOrEmpty();
         }
 
         [Fact]
         public void ShouldGetVersion()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
@@ -92,24 +131,22 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ExecuteWorks()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            response.Execute().Should().Be(null);
+            response.Execute().Should().Be((int)LogLevel.Information);
         }
 
         [Fact]
         public void RunWorks()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            AutoFake.Provide(new CommandLineApplication());
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            response.Execute("run").Should().Be(null);
+            response.Execute("run").Should().Be((int)LogLevel.Information);
         }
 
         [Theory]
@@ -119,17 +156,12 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldAllVerbosity(string command, LogLevel level)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var cla = new CommandLineApplication();
-            AutoFake.Provide(cla);
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            cla.OnExecute(() => 0);
-            var result = response.Execute(command);
-            result.Should().Be(0);
-
-            response.LogLevel.Should().Be(level);
+            var result = (LogLevel)response.Execute(command);
+            result.Should().Be(level);
         }
 
         [Theory]
@@ -142,17 +174,12 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldAllowLogLevelIn(string command, LogLevel level)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var cla = new CommandLineApplication();
-            AutoFake.Provide(cla);
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            cla.OnExecute(() => 0);
-            var result = response.Execute(command.Split(' '));
-            result.Should().Be(0);
-
-            response.LogLevel.Should().Be(level);
+            var result = (LogLevel)response.Execute(command.Split(' '));
+            result.Should().Be(level);
         }
 
         [Theory]
@@ -161,34 +188,18 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldDisallowInvalidLogLevels(string command)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var cla = new CommandLineApplication();
-            AutoFake.Provide(cla);
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            cla.OnExecute(() => 0);
             Action a = () => response.Execute(command.Split(' '));
             a.Should().Throw<CommandParsingException>();
         }
 
-        [Fact]
-        public void DefaultToGivenLogLevel()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var cla = new CommandLineApplication();
-            AutoFake.Provide(cla);
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
-            builder.LogLevel = LogLevel.None;
-
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            cla.OnExecute(() => 0);
-            var result = response.Execute();
-            result.Should().Be(0);
-
-            response.LogLevel.Should().Be(LogLevel.None);
-        }
+        [Command(),
+         Subcommand("a", typeof(SubCmd))]
+        class Cmd { public int OnExecute() => -1; }
+        class SubCmd { public int OnExecute() => -1; }
 
         [Theory]
         [InlineData("--version")]
@@ -196,77 +207,47 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         [InlineData("run --help")]
         [InlineData("cmd1 --help")]
         [InlineData("cmd1 a --help")]
-        [InlineData("cmd1 b --help")]
-        [InlineData("cmd1 c --help")]
-        [InlineData("cmd1 d --help")]
-        [InlineData("cmd1 e --help")]
         [InlineData("cmd2 --help")]
         [InlineData("cmd2 a --help")]
-        [InlineData("cmd2 b --help")]
-        [InlineData("cmd2 c --help")]
-        [InlineData("cmd2 d --help")]
-        [InlineData("cmd2 e --help")]
         [InlineData("cmd3 --help")]
         [InlineData("cmd3 a --help")]
-        [InlineData("cmd3 b --help")]
-        [InlineData("cmd3 c --help")]
-        [InlineData("cmd3 d --help")]
-        [InlineData("cmd3 e --help")]
         [InlineData("cmd4 --help")]
         [InlineData("cmd4 a --help")]
-        [InlineData("cmd4 b --help")]
-        [InlineData("cmd4 c --help")]
-        [InlineData("cmd4 d --help")]
-        [InlineData("cmd4 e --help")]
         [InlineData("cmd5 --help")]
         [InlineData("cmd5 a --help")]
-        [InlineData("cmd5 b --help")]
-        [InlineData("cmd5 c --help")]
-        [InlineData("cmd5 d --help")]
-        [InlineData("cmd5 e --help")]
         public void StopsForHelp(string command)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var cla = new CommandLineApplication();
-            AutoFake.Provide(cla);
-            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
 
-            var cmd1 = cla.Command("cmd1", application => application.OnExecute(() => -1));
-            cmd1.Command("a", application => application.OnExecute(() => -1));
-            cmd1.Command("b", application => application.OnExecute(() => -1));
-            cmd1.Command("c", application => application.OnExecute(() => -1));
-            cmd1.Command("d", application => application.OnExecute(() => -1));
-            cmd1.Command("e", application => application.OnExecute(() => -1));
-            var cmd2 = cla.Command("cmd2", application => application.OnExecute(() => -1));
-            cmd2.Command("a", application => application.OnExecute(() => -1));
-            cmd2.Command("b", application => application.OnExecute(() => -1));
-            cmd2.Command("c", application => application.OnExecute(() => -1));
-            cmd2.Command("d", application => application.OnExecute(() => -1));
-            cmd2.Command("e", application => application.OnExecute(() => -1));
-            var cmd3 = cla.Command("cmd3", application => application.OnExecute(() => -1));
-            cmd3.Command("a", application => application.OnExecute(() => -1));
-            cmd3.Command("b", application => application.OnExecute(() => -1));
-            cmd3.Command("c", application => application.OnExecute(() => -1));
-            cmd3.Command("d", application => application.OnExecute(() => -1));
-            cmd3.Command("e", application => application.OnExecute(() => -1));
-            var cmd4 = cla.Command("cmd4", application => application.OnExecute(() => -1));
-            cmd4.Command("a", application => application.OnExecute(() => -1));
-            cmd4.Command("b", application => application.OnExecute(() => -1));
-            cmd4.Command("c", application => application.OnExecute(() => -1));
-            cmd4.Command("d", application => application.OnExecute(() => -1));
-            cmd4.Command("e", application => application.OnExecute(() => -1));
-            var cmd5 = cla.Command("cmd5", application => application.OnExecute(() => -1));
-            cmd5.Command("a", application => application.OnExecute(() => -1));
-            cmd5.Command("b", application => application.OnExecute(() => -1));
-            cmd5.Command("c", application => application.OnExecute(() => -1));
-            cmd5.Command("d", application => application.OnExecute(() => -1));
-            cmd5.Command("e", application => application.OnExecute(() => -1));
+            builder
+                .AddCommand<Cmd>("cmd1")
+                .AddCommand<Cmd>("cmd2")
+                .AddCommand<Cmd>("cmd3")
+                .AddCommand<Cmd>("cmd4")
+                .AddCommand<Cmd>("cmd5");
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            cla.OnExecute(() => 0);
             var result = response.Execute(command.Split(' '));
-            result.Should().Be(0);
+            result.Should().BeGreaterOrEqualTo(0);
+        }
+
+        [Fact]
+        public void SupportsCustomDependencyInjection()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
+
+            var service = A.Fake<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+            var serviceProvider = A.Fake<IServiceProvider>();
+            A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service);
+            builder.WithServiceProvider(() => serviceProvider);
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute();
+
+            result.Should().Be(1000);
         }
     }
 }

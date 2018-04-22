@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>netstandard1.6;net451;netstandard2.0;net461</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\CommandLine.Abstractions\Rocket.Surgery.Extensions.CommandLine.Abstractions.csproj" />
+      <ProjectReference Include="..\CommandLine.Abstractions\Rocket.Surgery.Extensions.CommandLine.Abstractions.csproj" />
     </ItemGroup>
 	<ItemGroup>
 	    <PackageReference Include="Rocket.Surgery.Conventions" Version="$(RSG_Conventions_Version)" />
