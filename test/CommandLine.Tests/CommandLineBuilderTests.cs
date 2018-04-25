@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
@@ -338,6 +339,113 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var result = response.Execute("run", "someone", "--likes", "pie");
 
             application.RemainingArguments.Should().ContainInOrder("someone", "--likes", "pie");
+        }
+
+        [Command()]
+
+        public class InjectionConstructor
+        {
+            private readonly IService _service;
+
+            public InjectionConstructor(IService service)
+            {
+                _service = service;
+            }
+
+            public async Task<int> OnExecuteAsync()
+            {
+                await Task.Yield();
+                return _service.ReturnCode;
+            }
+        }
+
+        [Command()]
+
+        public class InjectionExecute
+        {
+            public InjectionExecute()
+            {
+            }
+
+            public async Task<int> OnExecuteAsync(IService service)
+            {
+                await Task.Yield();
+                return service.ReturnCode;
+            }
+        }
+
+        [Command()]
+
+        public class InjectionApp : ICommandLineDefault
+        {
+            public async Task<int> OnExecuteAsync(IApplicationState state, string[] remainingArguments)
+            {
+                await Task.Yield();
+                return 1;
+            }
+        }
+
+        [Fact]
+        public void SupportsInjection_Without_Creating_The_SubContainer()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+
+            builder
+                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
+                .AddCommand<InjectionConstructor>("constructor")
+                .AddCommand<InjectionExecute>("execute");
+
+            var service = AutoFake.Resolve<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute();
+            result.Should().Be(1);
+            A.CallTo(() => service.ReturnCode).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SupportsInjection_Createing_On_Construction()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+
+            builder
+                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
+                .AddCommand<InjectionConstructor>("constructor")
+                .AddCommand<InjectionExecute>("execute");
+
+            var service = AutoFake.Resolve<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute("constructor");
+            result.Should().Be(1000);
+            A.CallTo(() => service.ReturnCode).MustHaveHappened(1, Times.Exactly);
+        }
+
+        [Fact]
+        public void SupportsInjection_Createing_On_Execute()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+
+            builder
+                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
+                .AddCommand<InjectionConstructor>("constructor")
+                .AddCommand<InjectionExecute>("execute");
+
+            var service = AutoFake.Resolve<IService>();
+            A.CallTo(() => service.ReturnCode).Returns(1000);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute("constructor");
+            result.Should().Be(1000);
+            A.CallTo(() => service.ReturnCode).MustHaveHappened(1, Times.Exactly);
         }
     }
 }

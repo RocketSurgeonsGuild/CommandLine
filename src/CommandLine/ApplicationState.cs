@@ -18,8 +18,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
         }
         public Task<int> OnExecuteAsync()
         {
-            return _serviceProvider.GetService<T>()?.OnExecuteAsync(this, RemainingArguments) ??
-                   ActivatorUtilities.CreateInstance<T>(_serviceProvider, this as IApplicationState).OnExecuteAsync(this, RemainingArguments);
+            return _serviceProvider.GetService<DefinedServices>()
+                       ?.GetService<T>()
+                       ?.OnExecuteAsync(this, RemainingArguments)
+                ?? ActivatorUtilities.CreateInstance<T>(_serviceProvider)
+                       .OnExecuteAsync(this, RemainingArguments);
         }
 
         public string[] RemainingArguments { get; set; }

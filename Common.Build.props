@@ -20,6 +20,7 @@
         <xunit_Version>2.3.1</xunit_Version>
         <FluentAssertions_Version>5.3.0</FluentAssertions_Version>
         <FakeItEasy_Version>4.5.1</FakeItEasy_Version>
+        <Autofac_Extensions_Version>4.2.2</Autofac_Extensions_Version>
         <Autofac_FakeItEasy_Version>5.0.0</Autofac_FakeItEasy_Version>
         <Bogus_Version>22.0.8</Bogus_Version>
 		<RSG_Testing_Version>0.4.1</RSG_Testing_Version>

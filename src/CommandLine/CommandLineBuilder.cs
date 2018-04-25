@@ -83,10 +83,19 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 );
 
             _application.Conventions
-                .UseDefaultConventions()
+                .UseAttributes()
+                .SetAppNameFromEntryAssembly()
+                .SetRemainingArgsPropertyOnModel()
+                .SetSubcommandPropertyOnModel()
+                .SetParentPropertyOnModel()
+                .UseOnExecuteMethodFromModel()
+                .UseOnValidateMethodFromModel()
+                .UseOnValidationErrorMethodFromModel()
                 .AddConvention(new DefaultHelpOptionConvention())
                 .AddConvention(new VersionConvention(entryAssembly))
-                .UseConstructorInjection(new CommandLineServiceProvider(_application, _services, _serviceProviderFactory));
+                .AddConvention(new ActivatorUtilitiesConvention(
+                    new CommandLineServiceProvider(_application, new DefinedServices(_services), _serviceProviderFactory)
+                ));
 
             return new CommandLineHandler<T>(_application);
         }

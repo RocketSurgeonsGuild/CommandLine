@@ -7,14 +7,28 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    class DefinedServices : IServiceProvider
+    {
+        private readonly List<(Type serviceType, object serviceValue)> _services;
+
+        public DefinedServices(List<(Type serviceType, object serviceValue)> services)
+        {
+            _services = services;
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue;
+        }
+    }
     class CommandLineServiceProvider : IServiceProvider
     {
         private readonly IModelAccessor _modelAccessor;
         private readonly Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
         private IServiceProvider _serviceProvider;
-        private readonly List<(Type serviceType, object serviceValue)> _services;
+        private readonly DefinedServices _services;
 
-        public CommandLineServiceProvider(IModelAccessor modelAccessor, List<(Type serviceType, object serviceValue)> services, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
+        public CommandLineServiceProvider(IModelAccessor modelAccessor, DefinedServices services, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
         {
             _modelAccessor = modelAccessor ?? throw new ArgumentNullException(nameof(modelAccessor));
             _services = services ?? throw new ArgumentNullException(nameof(services));
@@ -38,7 +52,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return PhysicalConsole.Singleton;
             }
 
-            var givenService = _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue;
+            if (serviceType == typeof(DefinedServices))
+            {
+                return _services;
+            }
+
+            var givenService = _services.GetService(serviceType);
             if (givenService != null) return givenService;
 
             if (_serviceProviderFactory == null) return null;
