@@ -22,12 +22,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
         {
             return _serviceProvider.GetService<DefinedServices>()
                        ?.GetService<T>()
-                       ?.OnExecuteAsync(this, RemainingArguments.ToArray())
+                       ?.OnExecuteAsync(this, RemainingArguments)
                 ?? ActivatorUtilities.CreateInstance<T>(_serviceProvider)
-                       .OnExecuteAsync(this, RemainingArguments.ToArray());
+                       .OnExecuteAsync(this, RemainingArguments);
         }
 
-        public IEnumerable<string> RemainingArguments { get; set; }
+        public string[] RemainingArguments { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Verbose logging", Inherited = true, ShowInHelpText = true)]
         public bool Verbose { get; }

@@ -5,7 +5,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     public interface IApplicationState
     {
-        IEnumerable<string> RemainingArguments { get; }
+        string[] RemainingArguments { get; }
         bool Verbose { get; }
         bool Trace { get; }
         bool Debug { get; }
