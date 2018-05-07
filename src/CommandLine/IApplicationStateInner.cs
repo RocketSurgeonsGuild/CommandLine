@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     interface IApplicationStateInner : IApplicationState
     {
-        string[] RemainingArguments { get; set; }
+        IEnumerable<string> RemainingArguments { get; set; }
         Task<int> OnExecuteAsync();
     }
 }

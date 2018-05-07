@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,12 +22,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
         {
             return _serviceProvider.GetService<DefinedServices>()
                        ?.GetService<T>()
-                       ?.OnExecuteAsync(this, RemainingArguments)
+                       ?.OnExecuteAsync(this, RemainingArguments.ToArray())
                 ?? ActivatorUtilities.CreateInstance<T>(_serviceProvider)
-                       .OnExecuteAsync(this, RemainingArguments);
+                       .OnExecuteAsync(this, RemainingArguments.ToArray());
         }
 
-        public string[] RemainingArguments { get; set; }
+        public IEnumerable<string> RemainingArguments { get; set; }
 
         [Option(CommandOptionType.NoValue, Description = "Verbose logging", Inherited = true, ShowInHelpText = true)]
         public bool Verbose { get; }
