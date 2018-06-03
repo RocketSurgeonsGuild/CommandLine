@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
 using Rocket.Surgery.Extensions.Testing;
-using Rocket.Surgery.Hosting;
 using Xunit;
 using Xunit.Abstractions;
 

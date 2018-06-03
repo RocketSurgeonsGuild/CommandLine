@@ -3,14 +3,16 @@ using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Rocket.Surgery.Conventions;
 using Rocket.Surgery.Conventions.Reflection;
-using Rocket.Surgery.Hosting;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     public interface ICommandLineConventionContext : IConventionContext
     {
+        IConfiguration Configuration { get; }
+        IHostingEnvironment Environment { get; }
         IAssemblyProvider AssemblyProvider { get; }
         IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
         IConventionBuilder CommandLineApplicationConventions { get; }

@@ -6,8 +6,5 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// Interface ILoggingConvention
     /// </summary>
     /// TODO Edit XML Comment Template for ILoggingConvention
-    public interface ICommandLineConvention : IConvention<ICommandLineConventionContext>
-    {
-        
-    }
+    public interface ICommandLineConvention : IConvention<ICommandLineConventionContext> { }
 }

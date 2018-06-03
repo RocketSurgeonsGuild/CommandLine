@@ -7,11 +7,11 @@ using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Rocket.Surgery.Builders;
 using Rocket.Surgery.Conventions;
 using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
-using Rocket.Surgery.Hosting;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
@@ -31,10 +31,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
+            IConfiguration configuration,
+            IHostingEnvironment environment,
             ILogger logger) : base(scanner, assemblyProvider, assemblyCandidateFinder)
         {
             _application = new CommandLineApplication<ApplicationState<T>>();
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            Environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         protected override ICommandLineBuilder GetBuilder() => this;
@@ -51,6 +55,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
+        public IConfiguration Configuration { get; }
+        public IHostingEnvironment Environment { get; }
         public ILogger Logger { get; }
 
         public CommandLineBuilder<T> WithServiceProvider(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
