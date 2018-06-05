@@ -33,7 +33,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IAssemblyCandidateFinder assemblyCandidateFinder,
             IConfiguration configuration,
             IHostingEnvironment environment,
-            ILogger logger) : base(scanner, assemblyProvider, assemblyCandidateFinder)
+            ILogger logger,
+            IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
             _application = new CommandLineApplication<ApplicationState<T>>();
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
