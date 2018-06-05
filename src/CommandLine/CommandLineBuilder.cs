@@ -78,7 +78,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
-        public CommandLineHandler<T> Build(Assembly entryAssembly = null)
+        public CommandLineHandler Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = typeof(T).GetTypeInfo().Assembly;
 
@@ -104,7 +104,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     new CommandLineServiceProvider(_application, new DefinedServices(_services), _serviceProviderFactory)
                 ));
 
-            return new CommandLineHandler<T>(_application);
+            return new CommandLineHandler(_application);
         }
     }
 }

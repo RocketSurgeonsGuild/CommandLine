@@ -4,12 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    public class CommandLineHandler<T>
-        where T : class, ICommandLineDefault
+    public class CommandLineHandler
     {
-        public CommandLineApplication<ApplicationState<T>> Application { get; }
+        public CommandLineApplication Application { get; }
 
-        internal CommandLineHandler(CommandLineApplication<ApplicationState<T>> application)
+        internal CommandLineHandler(CommandLineApplication application)
         {
             Application = application;
         }
