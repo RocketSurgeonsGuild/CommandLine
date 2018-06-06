@@ -9,11 +9,10 @@
         <RSG_Build_Version>2.0.0</RSG_Build_Version>
         <RSG_Builders_Version>3.0.0</RSG_Builders_Version>
         <RSG_Conventions_Version>0.11.0</RSG_Conventions_Version>
-        <RSG_DependencyInjection_Version>0.8.0</RSG_DependencyInjection_Version>
         <Microsoft_Extensions_Configuration_Version>2.1.0</Microsoft_Extensions_Configuration_Version>
         <Microsoft_Extensions_DependencyInjection_Version>2.1.0</Microsoft_Extensions_DependencyInjection_Version>
         <Microsoft_Extensions_Hosting_Version>2.1.0</Microsoft_Extensions_Hosting_Version>
-        <McMaster_Version>2.2.1</McMaster_Version>
+        <McMaster_Version>2.2.4</McMaster_Version>
         <SourceLink_Version>2.8.1</SourceLink_Version>
         <Microsoft_NET_Test_Sdk_Version>15.7.2</Microsoft_NET_Test_Sdk_Version>
         <xunit_Version>2.3.1</xunit_Version>

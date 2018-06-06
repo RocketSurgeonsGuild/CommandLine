@@ -390,19 +390,18 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
             var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
 
+            var sp = AutoFake.Resolve<IServiceProvider>();
+
             builder
-                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
+                .WithServiceProvider(a => sp)
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
-
-            var service = AutoFake.Resolve<IService>();
-            A.CallTo(() => service.ReturnCode).Returns(1000);
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             var result = response.Execute();
             result.Should().Be(1);
-            A.CallTo(() => service.ReturnCode).MustNotHaveHappened();
+            A.CallTo(() => sp.GetService(A<Type>._)).MustNotHaveHappened();
         }
 
         [Fact]
