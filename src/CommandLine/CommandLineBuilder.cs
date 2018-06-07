@@ -12,22 +12,24 @@ using Rocket.Surgery.Builders;
 using Rocket.Surgery.Conventions;
 using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
+using System.Threading.Tasks;
+using McMaster.Extensions.CommandLineUtils.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// Logging Builder
     /// </summary>
-    public class CommandLineBuilder<T> : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
-        where T : class, ICommandLineDefault
+    public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
     {
-        private readonly CommandLineApplication<ApplicationState<T>> _application;
+        private readonly CommandLineApplication _application;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
         private Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
 
         public CommandLineBuilder(
+            CommandLineApplication rootApplication,
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
@@ -36,7 +38,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             ILogger logger,
             IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
-            _application = new CommandLineApplication<ApplicationState<T>>();
+            _application = rootApplication;
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Environment = environment ?? throw new ArgumentNullException(nameof(environment));
@@ -60,27 +62,28 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public IHostingEnvironment Environment { get; }
         public ILogger Logger { get; }
 
-        public CommandLineBuilder<T> WithServiceProvider(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
+        public CommandLineBuilder WithServiceProvider(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
         {
             _serviceProviderFactory = serviceProviderFactory;
             return this;
         }
 
-        public CommandLineBuilder<T> WithService<S>(S value)
+        public CommandLineBuilder WithService<S>(S value)
         {
             _services.Add((typeof(S), value));
             return this;
         }
 
-        public CommandLineBuilder<T> WithDefaultCommand(T value)
+        public CommandLineBuilder WithDefaultCommand(CommandLineDefaultDelegate @delegate)
         {
-            _services.Add((typeof(T), value));
+            var state = ((IModelAccessor)_application).GetModel() as ApplicationState;
+            state.Delegate = @delegate;
             return this;
         }
 
         public CommandLineHandler Build(Assembly entryAssembly = null)
         {
-            if (entryAssembly is null) entryAssembly = typeof(T).GetTypeInfo().Assembly;
+            if (entryAssembly is null) entryAssembly = Assembly.GetCallingAssembly();
 
             new ConventionComposer(Scanner)
                 .Register(
@@ -95,14 +98,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 .SetRemainingArgsPropertyOnModel()
                 .SetSubcommandPropertyOnModel()
                 .SetParentPropertyOnModel()
-                .UseOnExecuteMethodFromModel()
+                //.UseOnExecuteMethodFromModel()
                 .UseOnValidateMethodFromModel()
                 .UseOnValidationErrorMethodFromModel()
                 .AddConvention(new DefaultHelpOptionConvention())
                 .AddConvention(new VersionConvention(entryAssembly))
-                .AddConvention(new ActivatorUtilitiesConvention(
-                    new CommandLineServiceProvider(_application, new DefinedServices(_services), _serviceProviderFactory)
-                ));
+                .AddConvention(new ActivatorUtilitiesConvention(                    _serviceProviderFactory                ));
 
             return new CommandLineHandler(_application);
         }

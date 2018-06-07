@@ -21,37 +21,23 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return _services.FirstOrDefault(x => x.serviceType == serviceType).serviceValue;
         }
     }
+
     class CommandLineServiceProvider : IServiceProvider
     {
-        private readonly IModelAccessor _modelAccessor;
         private readonly Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
         private IServiceProvider _serviceProvider;
+        private readonly CommandLineApplication _application;
         private readonly DefinedServices _services;
 
-        public CommandLineServiceProvider(IModelAccessor modelAccessor, DefinedServices services, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
+        public CommandLineServiceProvider(DefinedServices services, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
         {
-            _modelAccessor = modelAccessor ?? throw new ArgumentNullException(nameof(modelAccessor));
+            _application = application ?? throw new ArgumentNullException(nameof(application));
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _serviceProviderFactory = serviceProviderFactory;
         }
 
         public object GetService(Type serviceType)
         {
-            if (typeof(IApplicationState).IsAssignableFrom(serviceType) && serviceType?.IsAssignableFrom(_modelAccessor.GetModelType()) == true)
-            {
-                return _modelAccessor.GetModel();
-            }
-
-            if (typeof(IApplicationStateInner).IsAssignableFrom(serviceType) && serviceType?.IsAssignableFrom(_modelAccessor.GetModelType()) == true)
-            {
-                return _modelAccessor.GetModel();
-            }
-
-            if (serviceType == typeof(IConsole))
-            {
-                return PhysicalConsole.Singleton;
-            }
-
             if (serviceType == typeof(DefinedServices))
             {
                 return _services;
