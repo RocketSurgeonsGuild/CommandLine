@@ -14,13 +14,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// </summary>
     public class ActivatorUtilitiesConvention : IConvention
     {
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public ActivatorUtilitiesConvention(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
-
 
         /// <inheritdoc />
         public virtual void Apply(ConventionContext context)

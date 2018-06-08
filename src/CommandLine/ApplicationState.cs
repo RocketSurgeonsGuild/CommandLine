@@ -12,7 +12,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     class ApplicationState : IApplicationState
     {
         public OnRunDelegate OnRunDelegate { get; set; }
-        public OnParseDelegate OnParseDelegate { get; set; }
+        public List<OnParseDelegate> OnParseDelegates { get; internal set; } = new List<OnParseDelegate>();
 
         public string[] RemainingArguments { get; set; }
 

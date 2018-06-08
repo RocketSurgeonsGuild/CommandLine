@@ -14,6 +14,7 @@ using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
@@ -72,11 +73,18 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public IConfiguration Configuration { get; }
         public IHostingEnvironment Environment { get; }
         public ILogger Logger { get; }
+        private IServiceCollection _serviceCollection;
 
         public CommandLineBuilder WithService<S>(S value)
         {
             _services.Add((typeof(S), value));
             return this;
+        }
+
+        public CommandLineBuilder ConnectToServices(IServiceCollection services)
+        {
+            _serviceCollection = services;
+            return OnParse(state => { services.AddSingleton(state); });
         }
 
         public CommandLineBuilder OnRun(OnRunDelegate @delegate)
@@ -87,8 +95,13 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public CommandLineBuilder OnParse(OnParseDelegate @delegate)
         {
-            _application.Model.OnParseDelegate = _run.Model.OnParseDelegate = @delegate;
+            _application.Model.OnParseDelegates.Add(@delegate);
             return this;
+        }
+
+        internal void LinkExecutor(ICommandLineExecutor executor)
+        {
+            _serviceCollection?.AddSingleton(executor);
         }
 
         public CommandLine Build(Assembly entryAssembly = null)
@@ -117,7 +130,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     new CommandLineServiceProvider(_application, new DefinedServices(_services))
                 ));
 
-            return new CommandLine(_application);
+            return new CommandLine(this, _application);
         }
     }
 }
