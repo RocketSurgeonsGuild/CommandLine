@@ -8,24 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    [Command(ThrowOnUnexpectedArgument = false), Subcommand("run", typeof(RunApplication))]
-    public class ApplicationState<T> : IApplicationStateInner
-        where T : class, ICommandLineDefault
+    [Command(ThrowOnUnexpectedArgument = false)]
+    class ApplicationState : IApplicationState
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public ApplicationState(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-        public Task<int> OnExecuteAsync()
-        {
-            return _serviceProvider.GetService<DefinedServices>()
-                       ?.GetService<T>()
-                       ?.OnExecuteAsync(this, RemainingArguments)
-                ?? ActivatorUtilities.CreateInstance<T>(_serviceProvider)
-                       .OnExecuteAsync(this, RemainingArguments);
-        }
+        public OnRunDelegate OnRunDelegate { get; set; }
+        public List<OnParseDelegate> OnParseDelegates { get; internal set; } = new List<OnParseDelegate>();
 
         public string[] RemainingArguments { get; set; }
 
