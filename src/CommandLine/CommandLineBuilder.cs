@@ -22,14 +22,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// </summary>
     public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
     {
-        private readonly CommandLineApplication _application;
+        private readonly CommandLineApplication<ApplicationState> _application;
+        private readonly CommandLineApplication<ApplicationState> _run;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
         private Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
 
         public CommandLineBuilder(
-            CommandLineApplication rootApplication,
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
@@ -38,7 +38,18 @@ namespace Rocket.Surgery.Extensions.CommandLine
             ILogger logger,
             IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
-            _application = rootApplication;
+            _application = new CommandLineApplication<ApplicationState>()
+            {
+                ThrowOnUnexpectedArgument = false
+            };
+            _run = _application.Command<ApplicationState>("run", application =>
+            {
+                application.ThrowOnUnexpectedArgument = false;
+                application.Description = "Run the application";
+                application.ExtendedHelpText = "Default action if no command is given";
+                application.ShowInHelpText = true;
+            });
+
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Environment = environment ?? throw new ArgumentNullException(nameof(environment));
@@ -62,26 +73,25 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public IHostingEnvironment Environment { get; }
         public ILogger Logger { get; }
 
-        public CommandLineBuilder WithServiceProvider(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
-        {
-            _serviceProviderFactory = serviceProviderFactory;
-            return this;
-        }
-
         public CommandLineBuilder WithService<S>(S value)
         {
             _services.Add((typeof(S), value));
             return this;
         }
 
-        public CommandLineBuilder WithDefaultCommand(CommandLineDefaultDelegate @delegate)
+        public CommandLineBuilder OnRun(OnRunDelegate @delegate)
         {
-            var state = ((IModelAccessor)_application).GetModel() as ApplicationState;
-            state.Delegate = @delegate;
+            _application.Model.OnRunDelegate = _run.Model.OnRunDelegate = @delegate;
             return this;
         }
 
-        public CommandLineHandler Build(Assembly entryAssembly = null)
+        public CommandLineBuilder OnParse(OnParseDelegate @delegate)
+        {
+            _application.Model.OnParseDelegate = _run.Model.OnParseDelegate = @delegate;
+            return this;
+        }
+
+        public CommandLine Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = Assembly.GetCallingAssembly();
 
@@ -103,9 +113,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 .UseOnValidationErrorMethodFromModel()
                 .AddConvention(new DefaultHelpOptionConvention())
                 .AddConvention(new VersionConvention(entryAssembly))
-                .AddConvention(new ActivatorUtilitiesConvention(                    _serviceProviderFactory                ));
+                .AddConvention(new ActivatorUtilitiesConvention(
+                    new CommandLineServiceProvider(_application, new DefinedServices(_services))
+                ));
 
-            return new CommandLineHandler(_application);
+            return new CommandLine(_application);
         }
     }
 }

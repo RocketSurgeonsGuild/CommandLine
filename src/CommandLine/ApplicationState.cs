@@ -8,25 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    [Command(ThrowOnUnexpectedArgument = false), Subcommand("run", typeof(RunApplication))]
-    public class ApplicationState : IApplicationStateInner
+    [Command(ThrowOnUnexpectedArgument = false)]
+    class ApplicationState : IApplicationState
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public ApplicationState(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public CommandLineDefaultDelegate Delegate { get; set; }
-        public Type Type { get; set; }
-
-        public Task<int> OnExecuteAsync()
-        {
-            return Delegate?.Invoke(this, RemainingArguments) ??
-                // TODO: Bring in extensions here that allow for invoke methods
-                throw new NotSupportedException("Default delegate or type was not defined for command line");
-        }
+        public OnRunDelegate OnRunDelegate { get; set; }
+        public OnParseDelegate OnParseDelegate { get; set; }
 
         public string[] RemainingArguments { get; set; }
 

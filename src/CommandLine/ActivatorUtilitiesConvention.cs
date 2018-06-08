@@ -14,40 +14,20 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// </summary>
     public class ActivatorUtilitiesConvention : IConvention
     {
-        private Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
+        private IServiceProvider _serviceProvider;
 
-        public ActivatorUtilitiesConvention(Func<IApplicationState, IServiceProvider> serviceProviderFactory)
+        public ActivatorUtilitiesConvention(IServiceProvider serviceProvider)
         {
-            _serviceProviderFactory = serviceProviderFactory;
-        }
-
-        class LazyServiceProvider : IServiceProvider
-        {
-            private readonly CommandLineApplication _application;
-            private readonly Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
-
-            public LazyServiceProvider(CommandLineApplication application, Func<IApplicationState, IServiceProvider> serviceProviderFactory)
-            {
-                _application = application;
-                _serviceProviderFactory = serviceProviderFactory;
-            }
-
-            public object GetService(Type serviceType)
-            {
-                // TODO: Get Option by attribute
-                // template or long name KebabCase
-                // + remaining args
-                throw new NotImplementedException();
-            }
+            _serviceProvider = serviceProvider;
         }
 
 
         /// <inheritdoc />
         public virtual void Apply(ConventionContext context)
         {
-            if (_serviceProviderFactory != null)
+            if (_serviceProvider != null)
             {
-                AdditionalServicesProperty.SetValue(context.Application, new LazyServiceProvider(context.Application, _serviceProviderFactory));
+                AdditionalServicesProperty.SetValue(context.Application, _serviceProvider);
             }
 
             if (context.ModelType == null)
@@ -57,7 +37,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
             ApplyMethod.MakeGenericMethod(context.ModelType).Invoke(this, new object[] { context });
 
-            context.Application.OnExecute(async () => await this.OnExecute(context));
+            context.Application.OnExecute(async () => await OnExecute(context));
         }
 
         private async Task<int> OnExecute(ConventionContext context)
@@ -89,17 +69,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 throw new InvalidOperationException(NoOnExecuteMethodFound);
             }
 
-            var model = ActivatorUtilities.CreateInstance(context.Application, context.ModelType);
-            var uninitializedModel = context.ModelAccessor.GetModel();
-
-            foreach (var field in typeInfo.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
-            {
-                field.SetValue(model, field.GetValue(uninitializedModel));
-            }
-            foreach (var property in typeInfo.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance).Where(x => x.CanWrite && x.CanRead))
-            {
-                property.SetValue(model, property.GetValue(uninitializedModel));
-            }
+            var constructor =
+                context.ModelType.GetTypeInfo()
+                    .DeclaredConstructors.Single();
+            var model = context.ModelAccessor.GetModel();
+            CallConstructor(context.Application, constructor, model);
 
             var arguments = (object[])BindParametersMethod.Invoke(null, new object[] { method, context.Application });
 
@@ -107,12 +81,24 @@ namespace Rocket.Surgery.Extensions.CommandLine
             {
                 return await InvokeAsync(method, model, arguments);
             }
-            else if (method.ReturnType == typeof(void) || method.ReturnType == typeof(int))
+            if (method.ReturnType == typeof(void) || method.ReturnType == typeof(int))
             {
                 return Invoke(method, model, arguments);
             }
 
             throw new InvalidOperationException(InvalidOnExecuteReturnType(method.Name));
+        }
+
+        private static void CallConstructor(IServiceProvider provider, ConstructorInfo constructorInfo, object instance)
+        {
+            var methodParams = constructorInfo.GetParameters();
+            var arguments = new object[methodParams.Length];
+            for (var index = 0; index < methodParams.Length; index++)
+            {
+                // does not support things like nullable properties
+                arguments[index] = provider.GetRequiredService(methodParams[index].ParameterType);
+            }
+            constructorInfo.Invoke(instance, arguments);
         }
 
         private async Task<int> InvokeAsync(MethodInfo method, object instance, object[] arguments)
@@ -147,7 +133,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public const string NoOnExecuteMethodFound = "No method named 'OnExecute' or 'OnExecuteAsync' could be found";
         public static string InvalidOnExecuteReturnType(string methodName) => methodName + " must have a return type of int or void, or if the method is async, Task<int> or Task.";
 
-        private static readonly PropertyInfo AdditionalServicesProperty =
+        internal static readonly PropertyInfo AdditionalServicesProperty =
             typeof(CommandLineApplication)
                 .GetRuntimeProperties()
                 .Single(m => m.Name == "AdditionalServices");
@@ -164,7 +150,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 () =>
                 {
                     return (TModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(TModel));
-                    // ActivatorUtilities.CreateInstance<TModel>(context.Application);
                 };
         }
     }

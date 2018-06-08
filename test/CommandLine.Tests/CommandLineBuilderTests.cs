@@ -17,38 +17,6 @@ using Xunit.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
-    class Application : ICommandLineDefault
-    {
-        public Application(IApplicationState applicationState)
-        {
-        }
-
-        public async Task<int> OnExecuteAsync(IApplicationState state, string[] args)
-        {
-            await Task.Yield();
-            RemainingArguments = args;
-            return (int)state.GetLogLevel();
-        }
-
-        public string[] RemainingArguments { get; private set; }
-    }
-
-    public class ServiceApplication : ICommandLineDefault
-    {
-        private readonly IService _service;
-
-        public ServiceApplication(IApplicationState state, IService service)
-        {
-            _service = service;
-        }
-
-        public async Task<int> OnExecuteAsync(IApplicationState state, string[] args)
-        {
-            await Task.Yield();
-            return _service.ReturnCode;
-        }
-    }
-
     public interface IService { int ReturnCode { get; } }
 
     public class CommandLineBuilderTests : AutoTestBase
@@ -59,7 +27,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void Constructs()
         {
             var assemblyProvider = AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder.AssemblyProvider.Should().BeSameAs(assemblyProvider);
             builder.AssemblyCandidateFinder.Should().NotBeNull();
@@ -77,7 +45,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void BuildsALogger()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             Action a = () => builder.Build();
             a.Should().NotThrow();
@@ -99,7 +67,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldEnableHelpOnAllCommands()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder.AddCommand<Remote>("remote");
             builder.AddCommand<Fetch>("fetch");
@@ -108,7 +76,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             response.Application.OptionHelp.Should().NotBeNull();
 
-            response.Execute("remote", "add", "-v").Should().Be(1);
+            response.Execute(AutoFake.Resolve<IServiceProvider>(), "remote", "add", "-v").Should().Be(1);
             Logger.LogInformation(response.Application.Commands.Find(x => x.Name == "remote").GetHelpText());
             response.Application.Commands.Find(x => x.Name == "fetch").GetHelpText().Should().NotBeNullOrEmpty();
         }
@@ -117,7 +85,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldGetVersion()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
@@ -129,22 +97,26 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ExecuteWorks()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder
+                .OnRun((state) => (int)state.GetLogLevel())
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            response.Execute().Should().Be((int)LogLevel.Information);
+            response.Execute(AutoFake.Resolve<IServiceProvider>()).Should().Be((int)LogLevel.Information);
         }
 
         [Fact]
         public void RunWorks()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder
+                .OnRun((state) => (int)state.GetLogLevel())
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            response.Execute("run").Should().Be((int)LogLevel.Information);
+            response.Execute(AutoFake.Resolve<IServiceProvider>(), "run").Should().Be((int)LogLevel.Information);
         }
 
         [Theory]
@@ -154,11 +126,13 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldAllVerbosity(string command, LogLevel level)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder
+                .OnRun((state) => (int)state.GetLogLevel())
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = (LogLevel)response.Execute(command);
+            var result = (LogLevel)response.Execute(AutoFake.Resolve<IServiceProvider>(), command);
             result.Should().Be(level);
         }
 
@@ -172,11 +146,13 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldAllowLogLevelIn(string command, LogLevel level)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var response = builder
+                .OnRun((state) => (int)state.GetLogLevel())
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = (LogLevel)response.Execute(command.Split(' '));
+            var result = (LogLevel)response.Execute(AutoFake.Resolve<IServiceProvider>(), command.Split(' '));
             result.Should().Be(level);
         }
 
@@ -186,11 +162,11 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void ShouldDisallowInvalidLogLevels(string command)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            Action a = () => response.Execute(command.Split(' '));
+            Action a = () => response.Execute(AutoFake.Resolve<IServiceProvider>(), command.Split(' '));
             a.Should().Throw<CommandParsingException>();
         }
 
@@ -216,7 +192,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void StopsForHelp(string command)
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder
                 .AddCommand<Cmd>("cmd1")
@@ -225,37 +201,17 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 .AddCommand<Cmd>("cmd4")
                 .AddCommand<Cmd>("cmd5");
 
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-            var result = response.Execute(command.Split(' '));
+            var response = builder
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            var result = response.Execute(AutoFake.Resolve<IServiceProvider>(), command.Split(' '));
             result.Should().BeGreaterOrEqualTo(0);
-        }
-
-        [Fact]
-        public void SupportsCustomDependencyInjection()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
-
-            var service = A.Fake<IService>();
-            A.CallTo(() => service.ReturnCode).Returns(1000);
-
-            var serviceProvider = A.Fake<IServiceProvider>();
-
-            A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
-            A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
-            builder.WithServiceProvider(x => serviceProvider);
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            var result = response.Execute();
-
-            result.Should().Be(1000);
         }
 
         [Fact]
         public void SupportsAppllicationStateWithCustomDependencyInjection()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var service = A.Fake<IService>();
             A.CallTo(() => service.ReturnCode).Returns(1000);
@@ -264,80 +220,16 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
             A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
-            builder.WithServiceProvider(x =>
+            builder.OnRun((state) => 
             {
-                x.GetLogLevel().Should().Be(LogLevel.Error);
-                return serviceProvider;
+                state.GetLogLevel().Should().Be(LogLevel.Error);
+                return 1000;
             });
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = response.Execute("--log", "error");
+            var result = response.Execute(AutoFake.Resolve<IServiceProvider>(), "--log", "error");
 
             result.Should().Be(1000);
-        }
-
-        [Fact]
-        public void SupportsCustomServices()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
-
-            var service = A.Fake<IService>();
-            A.CallTo(() => service.ReturnCode).Returns(1000);
-
-            builder.WithService(service);
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            var result = response.Execute();
-
-            result.Should().Be(1000);
-        }
-
-        [Fact]
-        public void SupportsGivenCommandLineDefault()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<ServiceApplication>>();
-
-            var service = A.Fake<IService>();
-            A.CallTo(() => service.ReturnCode).Returns(1000);
-
-            builder.WithDefaultCommand(new ServiceApplication(null, service));
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            var result = response.Execute();
-
-            result.Should().Be(1000);
-        }
-
-        [Fact]
-        public void DumpsOutRemainingArgumentsForDefault()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
-            var application = new Application(null);
-            builder.WithDefaultCommand(application);
-
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            var result = response.Execute("someone", "likes", "--pie");
-
-            application.RemainingArguments.Should().ContainInOrder("someone", "likes", "--pie");
-        }
-
-        [Fact]
-        public void DumpsOutRemainingArgumentsForRun()
-        {
-            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<Application>>();
-            var application = new Application(null);
-            builder.WithDefaultCommand(application);
-
-            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
-
-            var result = response.Execute("run", "someone", "--likes", "pie");
-
-            application.RemainingArguments.Should().ContainInOrder("someone", "--likes", "pie");
         }
 
         [Command()]
@@ -375,7 +267,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
         [Command()]
 
-        public class InjectionApp : ICommandLineDefault
+        public class InjectionApp
         {
             public async Task<int> OnExecuteAsync(IApplicationState state, string[] remainingArguments)
             {
@@ -388,19 +280,17 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void SupportsInjection_Without_Creating_The_SubContainer()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             var sp = AutoFake.Resolve<IServiceProvider>();
 
             builder
-                .WithServiceProvider(a => sp)
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = response.Execute();
-            result.Should().Be(1);
+            var result = response.Parse("constructor");
             A.CallTo(() => sp.GetService(A<Type>._)).MustNotHaveHappened();
         }
 
@@ -408,10 +298,9 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void SupportsInjection_Createing_On_Construction()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder
-                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
 
@@ -420,7 +309,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = response.Execute("constructor");
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "constructor");
             result.Should().Be(1000);
             A.CallTo(() => service.ReturnCode).MustHaveHappened(1, Times.Exactly);
         }
@@ -429,10 +318,9 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         public void SupportsInjection_Createing_On_Execute()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
-            var builder = AutoFake.Resolve<CommandLineBuilder<InjectionApp>>();
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
 
             builder
-                .WithServiceProvider(a => new AutofacServiceProvider(AutoFake.Container))
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
 
@@ -441,7 +329,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
-            var result = response.Execute("constructor");
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "constructor");
             result.Should().Be(1000);
             A.CallTo(() => service.ReturnCode).MustHaveHappened(1, Times.Exactly);
         }

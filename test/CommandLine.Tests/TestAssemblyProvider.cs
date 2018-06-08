@@ -10,7 +10,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         {
             return new[]
             {
-                typeof(CommandLineBuilder<>).GetTypeInfo().Assembly,
+                typeof(CommandLineBuilder).GetTypeInfo().Assembly,
                 typeof(TestAssemblyProvider).GetTypeInfo().Assembly
             };
         }

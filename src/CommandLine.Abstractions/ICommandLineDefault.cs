@@ -2,5 +2,7 @@
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    public delegate Task<int> CommandLineDefaultDelegate(IApplicationState state, string[] remainingArguments);
+    public delegate int OnRunDelegate(IApplicationState state);
+
+    public delegate void OnParseDelegate(IApplicationState state);
 }
