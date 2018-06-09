@@ -5,7 +5,7 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
-    public class CommandLine
+    public class CommandLine : ICommandLine
     {
         private readonly CommandLineBuilder _commandLineBuilder;
 

@@ -21,7 +21,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// Logging Builder
     /// </summary>
-    public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder
+    public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly CommandLineApplication<ApplicationState> _application;
         private readonly CommandLineApplication<ApplicationState> _run;
@@ -60,13 +60,28 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public IConventionBuilder CommandLineApplicationConventions => _application.Conventions;
 
-        public ICommandLineConventionContext AddCommand<TSubCommand>(string name, Action<CommandLineApplication<TSubCommand>> action = null, bool throwOnUnexpectedArg = true)
-            where TSubCommand : class
+        ICommandLineConventionContext ICommandLineConventionContext.AddCommand<T>(string name,
+            Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true)
         {
-            if (action == null)
-                action = application => { };
+            AddCommand(name, action, throwOnUnexpectedArg);
+            return this;
+        }
 
-            _application.Command(name, action, throwOnUnexpectedArg);
+        ICommandLineConventionContext ICommandLineConventionContext.OnParse(OnParseDelegate @delegate)
+        {
+            OnParse(@delegate);
+            return this;
+        }
+
+        ICommandLineConventionContext ICommandLineConventionContext.OnRun(OnRunDelegate @delegate)
+        {
+            OnRun(@delegate);
+            return this;
+        }
+
+        ICommandLineConventionContext ICommandLineConventionContext.WithService<S>(S value)
+        {
+            WithService(value);
             return this;
         }
 
@@ -75,25 +90,35 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public ILogger Logger { get; }
         private IServiceCollection _serviceCollection;
 
-        public CommandLineBuilder WithService<S>(S value)
+        public ICommandLineBuilder WithService<S>(S value)
         {
             _services.Add((typeof(S), value));
             return this;
         }
 
-        public CommandLineBuilder ConnectToServices(IServiceCollection services)
+        public ICommandLineBuilder ConnectToServices(IServiceCollection services)
         {
             _serviceCollection = services;
             return OnParse(state => { services.AddSingleton(state); });
         }
 
-        public CommandLineBuilder OnRun(OnRunDelegate @delegate)
+        public ICommandLineBuilder OnRun(OnRunDelegate @delegate)
         {
             _application.Model.OnRunDelegate = _run.Model.OnRunDelegate = @delegate;
             return this;
         }
 
-        public CommandLineBuilder OnParse(OnParseDelegate @delegate)
+        public ICommandLineBuilder AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true)
+            where T : class
+        {
+            if (action == null)
+                action = application => { };
+
+            _application.Command(name, action, throwOnUnexpectedArg);
+            return this;
+        }
+
+        public ICommandLineBuilder OnParse(OnParseDelegate @delegate)
         {
             _application.Model.OnParseDelegates.Add(@delegate);
             return this;
@@ -104,7 +129,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             _serviceCollection?.AddSingleton(executor);
         }
 
-        public CommandLine Build(Assembly entryAssembly = null)
+        public ICommandLine Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = Assembly.GetCallingAssembly();
 
