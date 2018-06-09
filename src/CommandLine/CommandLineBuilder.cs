@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -25,6 +26,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     {
         private readonly CommandLineApplication<ApplicationState> _application;
         private readonly CommandLineApplication<ApplicationState> _run;
+        private readonly DiagnosticSource _diagnosticSource;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
@@ -36,7 +38,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IAssemblyCandidateFinder assemblyCandidateFinder,
             IConfiguration configuration,
             IHostingEnvironment environment,
-            ILogger logger,
+            DiagnosticSource diagnosticSource,
             IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
             _application = new CommandLineApplication<ApplicationState>()
@@ -51,7 +53,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 application.ShowInHelpText = true;
             });
 
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _diagnosticSource = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
+            Logger = new DiagnosticLogger(diagnosticSource);
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
