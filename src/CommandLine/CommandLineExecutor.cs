@@ -10,12 +10,16 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     class CommandLineExecutor : ICommandLineExecutor
     {
-        public CommandLineExecutor(CommandLineApplication application)
+        public CommandLineExecutor(CommandLineApplication application, IApplicationState applicationState)
         {
             Application = application;
+            ApplicationState = applicationState;
+            IsDefaultCommand = Application is IModelAccessor m && m.GetModelType() == typeof(ApplicationState);
         }
 
         public CommandLineApplication Application { get; }
+        public IApplicationState ApplicationState { get; }
+        public bool IsDefaultCommand { get; }
 
         public int Execute(IServiceProvider serviceProvider)
         {

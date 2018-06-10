@@ -27,14 +27,16 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 parent = parent.Parent;
             }
 
+            ApplicationState myState = null;
             if (parent is IModelAccessor ma && ma.GetModel() is ApplicationState state)
             {
                 if (state.OnParseDelegates == null) state.OnParseDelegates = new List<OnParseDelegate>();
                 foreach (var d in state.OnParseDelegates)
                     d(state);
+                myState = state;
             }
 
-            var executor = new CommandLineExecutor(result.SelectedCommand);
+            var executor = new CommandLineExecutor(result.SelectedCommand, myState);
             _commandLineBuilder.LinkExecutor(executor);
             return executor;
         }
