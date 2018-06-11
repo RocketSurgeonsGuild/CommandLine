@@ -30,6 +30,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
             ApplicationState myState = null;
             if (parent is IModelAccessor ma && ma.GetModel() is ApplicationState state)
             {
+                state.IsDefaultCommand = Application is IModelAccessor m && m.GetModelType() == typeof(ApplicationState);
+
                 if (state.OnParseDelegates == null) state.OnParseDelegates = new List<OnParseDelegate>();
                 foreach (var d in state.OnParseDelegates)
                     d(state);

@@ -10,5 +10,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
         bool Trace { get; }
         bool Debug { get; }
         LogLevel GetLogLevel();
+        bool IsDefaultCommand { get; }
     }
 }

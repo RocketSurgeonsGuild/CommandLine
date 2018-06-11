@@ -28,6 +28,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
         [Option(CommandOptionType.SingleValue, Description = "Log level", Inherited = true, ShowInHelpText = true)]
         public (bool HasValue, LogLevel Level) Log { get; }
 
+        public bool IsDefaultCommand { get; internal set; }
+
         public LogLevel GetLogLevel()
         {
             if (Log.HasValue)
