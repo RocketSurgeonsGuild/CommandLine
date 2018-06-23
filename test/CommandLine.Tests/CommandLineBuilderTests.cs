@@ -265,17 +265,6 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             }
         }
 
-        [Command()]
-
-        public class InjectionApp
-        {
-            public async Task<int> OnExecuteAsync(IApplicationState state, string[] remainingArguments)
-            {
-                await Task.Yield();
-                return 1;
-            }
-        }
-
         [Fact]
         public void SupportsInjection_Without_Creating_The_SubContainer()
         {
@@ -288,6 +277,8 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
 
+            builder.OnParse((state) => { state.IsDefaultCommand.Should().BeFalse(); });
+
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             var result = response.Parse("constructor");
@@ -295,7 +286,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         }
 
         [Fact]
-        public void SupportsInjection_Createing_On_Construction()
+        public void SupportsInjection_Creating_On_Construction()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
             var builder = AutoFake.Resolve<CommandLineBuilder>();
@@ -303,6 +294,8 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             builder
                 .AddCommand<InjectionConstructor>("constructor")
                 .AddCommand<InjectionExecute>("execute");
+
+            builder.OnParse((state) => { state.IsDefaultCommand.Should().BeFalse(); });
 
             var service = AutoFake.Resolve<IService>();
             A.CallTo(() => service.ReturnCode).Returns(1000);
@@ -315,7 +308,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         }
 
         [Fact]
-        public void SupportsInjection_Createing_On_Execute()
+        public void SupportsInjection_Creating_On_Execute()
         {
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
             var builder = AutoFake.Resolve<CommandLineBuilder>();
