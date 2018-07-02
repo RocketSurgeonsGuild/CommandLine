@@ -4,6 +4,6 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\src\CommandLine\Rocket.Surgery.Extensions.CommandLine.csproj" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(Autofac_Extensions_Version)" />
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" />
     </ItemGroup>
 </Project>

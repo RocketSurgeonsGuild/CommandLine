@@ -6,8 +6,8 @@
       <ProjectReference Include="..\CommandLine.Abstractions\Rocket.Surgery.Extensions.CommandLine.Abstractions.csproj" />
     </ItemGroup>
 	<ItemGroup>
-	    <PackageReference Include="Rocket.Surgery.Conventions" Version="$(RSG_Conventions_Version)" />
-	    <PackageReference Include="Rocket.Surgery.Builders" Version="$(RSG_Builders_Version)" />
-        <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="$(System_Diagnostics_DiagnosticSource_Version)" />
+	    <PackageReference Include="Rocket.Surgery.Conventions" />
+	    <PackageReference Include="Rocket.Surgery.Builders" />
+        <PackageReference Include="System.Diagnostics.DiagnosticSource" />
 	</ItemGroup>
 </Project>
