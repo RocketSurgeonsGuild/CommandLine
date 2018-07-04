@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>netcoreapp2.0;netcoreapp2.1;net461</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\src\CommandLine\Rocket.Surgery.Extensions.CommandLine.csproj" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+        <ProjectReference Include="..\..\src\CommandLine\Rocket.Surgery.Extensions.CommandLine.csproj" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" />
     </ItemGroup>
 </Project>
