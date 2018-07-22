@@ -1,7 +1,7 @@
 <Project>
     <ItemGroup>
         <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
-        <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.2.4" />
+        <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
         <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.0" />
         <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0" />
         <PackageReference Update="Rocket.Surgery.Builders" Version="3.0.0" />
@@ -17,15 +17,15 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Update="Autofac.Extras.FakeItEasy" Version="5.0.1" />
-        <PackageReference Update="Bogus" Version="22.1.3" />
-        <PackageReference Update="coverlet.msbuild" Version="2.0.1" />
-        <PackageReference Update="FakeItEasy" Version="4.6.0" />
-        <PackageReference Update="FakeItEasy.Analyzer.CSharp" Version="4.6.0" />
+        <PackageReference Update="Bogus" Version="22.3.2" />
+        <PackageReference Update="coverlet.msbuild" Version="2.1.1" />
+        <PackageReference Update="FakeItEasy" Version="4.7.1" />
+        <PackageReference Update="FakeItEasy.Analyzer.CSharp" Version="4.7.1" />
         <PackageReference Update="FluentAssertions" Version="5.4.1" />
-        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="15.7.2" />
-        <PackageReference Update="Rocket.Surgery.Extensions.Testing" Version="0.8.0" />
-        <PackageReference Update="xunit" Version="2.3.1" />
-        <PackageReference Update="xunit.runner.visualstudio" Version="2.3.1" />
+        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+        <PackageReference Update="Rocket.Surgery.Extensions.Testing" Version="0.8.2" />
+        <PackageReference Update="xunit" Version="2.4.0" />
+        <PackageReference Update="xunit.runner.visualstudio" Version="2.4.0" />
         <PackageReference Update="XunitXml.TestLogger" Version="2.0.0" />
     </ItemGroup>
 </Project>
