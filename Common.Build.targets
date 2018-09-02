@@ -2,8 +2,8 @@
     <ItemGroup>
         <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="4.3.0" />
         <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
-        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.0" />
-        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0" />
+        <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.1" />
+        <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.1" />
         <PackageReference Update="Rocket.Surgery.Builders" Version="3.1.0" />
         <PackageReference Update="Rocket.Surgery.Builders.Abstractions" Version="3.1.0" />
         <PackageReference Update="Rocket.Surgery.Conventions" Version="0.13.1" />
