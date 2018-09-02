@@ -158,7 +158,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     new CommandLineServiceProvider(_application, new DefinedServices(_services))
                 ));
 
-            return new CommandLine(this, _application);
+            return new CommandLine(this, _application, Logger);
         }
     }
 }

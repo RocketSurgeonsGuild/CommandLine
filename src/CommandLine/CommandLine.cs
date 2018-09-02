@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     public class CommandLine : ICommandLine
     {
         private readonly CommandLineBuilder _commandLineBuilder;
+        private readonly ILogger _logger;
 
-        internal CommandLine(CommandLineBuilder commandLineBuilder, CommandLineApplication application)
+        internal CommandLine(CommandLineBuilder commandLineBuilder, CommandLineApplication application, ILogger logger)
         {
             _commandLineBuilder = commandLineBuilder;
+            _logger = logger;
             Application = application;
         }
 
@@ -19,6 +24,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public ICommandLineExecutor Parse(params string[] args)
         {
+            _logger.LogTrace("Parsing {@Args}", args);
             var result = Application.Parse(args);
 
             var parent = result.SelectedCommand;
@@ -38,6 +44,22 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 myState = state;
             }
 
+            _logger.LogTrace("Selected Command {@Command} {@State}",
+                new
+                {
+                    result.SelectedCommand.FullName,
+                    result.SelectedCommand.Name,
+                    result.SelectedCommand.Description
+                }, 
+                new
+                {
+                    myState.RemainingArguments,
+                    myState.Trace,
+                    myState.Verbose,
+                    myState.Log.Level
+                }
+            );
+
             var executor = new CommandLineExecutor(result.SelectedCommand, myState);
             _commandLineBuilder.LinkExecutor(executor);
             return executor;
@@ -45,6 +67,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public int Execute(IServiceProvider serviceProvider, params string[] args)
         {
+            _logger.LogTrace("Executing {@Args}", args);
             return Parse(args).Execute(serviceProvider);
         }
     }
