@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -325,6 +326,40 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "constructor");
             result.Should().Be(1000);
             A.CallTo(() => service.ReturnCode).MustHaveHappened(1, Times.Exactly);
+        }
+
+        [Command()]
+        class CommandWithValues
+        {
+            [Option("--api-domain", CommandOptionType.SingleValue, Description = "The auth0 Domain")]
+            public string ApiDomain { get; }
+
+            [Option("--client-name", CommandOptionType.SingleValue, Description = "The client name to create or update")]
+            public string ClientName { get; }
+
+            [Option("--origin", CommandOptionType.MultipleValue, Description =
+                "The origins that are allowed to access the client")]
+            public IEnumerable<string> Origins { get; set; } = Enumerable.Empty<string>();
+
+            public int OnExecute()
+            {
+                ApiDomain.Should().Be("mydomain.com");
+                ClientName.Should().Be("client1");
+                Origins.Should().Contain("origin1");
+                Origins.Should().Contain("origin2");
+                return -1;
+            }
+        }
+
+        [Fact]
+        public void Sets_Values_In_Commands()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            builder.AddCommand<CommandWithValues>("cwv");
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            response.Execute(new AutofacServiceProvider(AutoFake.Container), "cwv", "--api-domain", "mydomain.com",
+                "--origin", "origin1", "--origin", "origin2", "--client-name", "client1");
         }
     }
 }

@@ -1,13 +1,65 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    public class BackingFieldHelper
+    {
+        private static FieldInfo GetBackingField(PropertyInfo pi)
+        {
+            if (!pi.CanRead || !pi.GetMethod.IsDefined(typeof(CompilerGeneratedAttribute), inherit: true))
+                return null;
+
+            var backingField = pi.DeclaringType.GetTypeInfo().GetDeclaredField($"<{pi.Name}>k__BackingField");
+            if (backingField == null)
+                return null;
+
+            if (!backingField.IsDefined(typeof(CompilerGeneratedAttribute), inherit: true))
+                return null;
+
+            return backingField;
+        }
+
+        private static FieldInfo GetBackingField(Type objectType, Type interfaceType, string name)
+        {
+            var property = objectType.GetTypeInfo().GetProperty($"{interfaceType.FullName.Replace("+", ".")}.{name}", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (property == null)
+                property = objectType.GetTypeInfo().GetProperty(name);
+
+            return GetBackingField(property);
+        }
+
+        public static FieldInfo GetBackingField<TInterface, TValue>(Type type, Expression<Func<TInterface, TValue>> expression)
+        {
+            if (expression.Body is MemberExpression exp)
+            {
+                return GetBackingField(type, typeof(TInterface), exp.Member.Name);
+            }
+            throw new NotSupportedException("Given Expression is not supported");
+        }
+
+        public static void SetBackingField<TInterface, TValue>(TInterface instance, Expression<Func<TInterface, TValue>> expression, TValue value)
+        {
+            if (expression.Body is MemberExpression exp)
+            {
+                var field = GetBackingField(instance.GetType(), expression);
+                field.SetValue(instance, value);
+                return;
+            }
+            throw new NotSupportedException("Given Expression is not supported");
+        }
+    }
+
+
     /// <summary>
     /// Uses an instance of <see cref="IServiceProvider" /> to call constructors
     /// when creating models.
@@ -72,7 +124,30 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 context.ModelType.GetTypeInfo()
                     .DeclaredConstructors.Single();
             var model = context.ModelAccessor.GetModel();
+
+            // Preserve any values that have been set by the command line
+            var properties = context.ModelType
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(x => x.CanRead && x.CanWrite)
+                .Select(x => (PropertyInfo: x, value: x.GetValue(model)))
+                .Where(x => x.value != default)
+                .ToArray(); // Lazy evaluation is killer
+            var fields = context.ModelType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Select(x => (FieldInfo: x, value: x.GetValue(model)))
+                .Where(x => x.value != default)
+                .ToArray(); // Lazy evaluation is killer
+
             CallConstructor(context.Application, constructor, model);
+
+            // Restore fields that might have been overwritten
+            foreach (var field in fields)
+            {
+                field.FieldInfo.SetValue(model, field.value);
+            }
+            foreach (var property in properties)
+            {
+                property.PropertyInfo.SetValue(model, property.value);
+            }
 
             var arguments = (object[])BindParametersMethod.Invoke(null, new object[] { method, context.Application });
 
