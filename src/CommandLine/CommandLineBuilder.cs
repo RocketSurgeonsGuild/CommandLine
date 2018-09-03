@@ -25,12 +25,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly CommandLineApplication<ApplicationState> _application;
-        private readonly CommandLineApplication<ApplicationState> _run;
+        private readonly CommandLineApplication<RunApplicationState> _run;
         private readonly DiagnosticSource _diagnosticSource;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
-        private Func<IApplicationState, IServiceProvider> _serviceProviderFactory;
 
         public CommandLineBuilder(
             IConventionScanner scanner,
@@ -43,9 +42,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
             {
                 ThrowOnUnexpectedArgument = false
             };
-            _run = _application.Command<ApplicationState>("run", application =>
+            _run = _application.Command<RunApplicationState>("run", application =>
             {
-                application.ThrowOnUnexpectedArgument = false;
                 application.Description = "Run the application";
                 application.ExtendedHelpText = "Default action if no command is given";
                 application.ShowInHelpText = true;

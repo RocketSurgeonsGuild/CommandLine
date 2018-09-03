@@ -158,6 +158,26 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         }
 
         [Theory]
+        [InlineData("run -l debug", LogLevel.Debug)]
+        [InlineData("run -l nonE", LogLevel.None)]
+        [InlineData("run -l Information", LogLevel.Information)]
+        [InlineData("run -l Error", LogLevel.Error)]
+        [InlineData("run -l WARNING", LogLevel.Warning)]
+        [InlineData("run -l critical", LogLevel.Critical)]
+        public void ShouldRunAllowLogLevelIn(string command, LogLevel level)
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var response = builder
+                .OnRun((state) => (int)state.GetLogLevel())
+                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = (LogLevel)response.Execute(AutoFake.Resolve<IServiceProvider>(), command.Split(' '));
+            result.Should().Be(level);
+        }
+
+        [Theory]
         [InlineData("-l invalid")]
         [InlineData("-l ")]
         public void ShouldDisallowInvalidLogLevels(string command)
