@@ -11,10 +11,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     public interface ICommandLineConventionContext : IConventionContext
     {
-        IConfiguration Configuration { get; }
-        IHostingEnvironment Environment { get; }
-        IAssemblyProvider AssemblyProvider { get; }
-        IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
+        //IAssemblyProvider AssemblyProvider { get; }
+        //IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
         IConventionBuilder CommandLineApplicationConventions { get; }
         ICommandLineConventionContext AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true) where T : class;
         ICommandLineConventionContext OnParse(OnParseDelegate @delegate);

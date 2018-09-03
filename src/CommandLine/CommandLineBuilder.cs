@@ -36,8 +36,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
-            IConfiguration configuration,
-            IHostingEnvironment environment,
             DiagnosticSource diagnosticSource,
             IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
@@ -55,8 +53,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
             _diagnosticSource = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
             Logger = new DiagnosticLogger(diagnosticSource);
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            Environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         protected override ICommandLineBuilder GetBuilder() => this;
@@ -88,8 +84,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
-        public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }
         public ILogger Logger { get; }
         private IServiceCollection _serviceCollection;
 
