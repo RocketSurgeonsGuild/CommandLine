@@ -99,7 +99,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
         public ICommandLineBuilder OnRun(OnRunDelegate @delegate)
         {
-            _application.Model.OnRunDelegate = _run.Model.OnRunDelegate = @delegate;
+            _application.Model.OnRunDelegate = @delegate;
             return this;
         }
 
