@@ -14,7 +14,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         {
             Application = application;
             ApplicationState = applicationState;
-            IsDefaultCommand = Application is IModelAccessor m && m.GetModelType() == typeof(ApplicationState) || Application.IsShowingInformation;
+            IsDefaultCommand = Application is IModelAccessor m && m.GetModelType() == typeof(ApplicationState) && !Application.IsShowingInformation;
         }
 
         public CommandLineApplication Application { get; }
