@@ -36,7 +36,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
             if (Application is IModelAccessor ma && ma.GetModel() is ApplicationState state)
             {
-                return state.OnRunDelegate?.Invoke(state) ?? 0;
+                return state.OnRunDelegate?.Invoke(state) ?? int.MinValue;
             }
 
             ActivatorUtilitiesConvention.AdditionalServicesProperty.SetValue(Application, serviceProvider);
