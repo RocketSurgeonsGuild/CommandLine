@@ -28,7 +28,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return 0;
             }
 
-            var validationResult = (ValidationResult)GetValidationResultMethod.Invoke(Application, Array.Empty<object>());
+            
+            var validationResult = Application.GetValidationResult();
             if (validationResult != ValidationResult.Success)
             {
                 return Application.ValidationErrorHandler(validationResult);
@@ -42,8 +43,5 @@ namespace Rocket.Surgery.Extensions.CommandLine
             ActivatorUtilitiesConvention.AdditionalServicesProperty.SetValue(Application, serviceProvider);
             return Application.Invoke();
         }
-
-        private readonly MethodInfo GetValidationResultMethod = typeof(CommandLineApplication)
-            .GetMethod("GetValidationResult", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 }
