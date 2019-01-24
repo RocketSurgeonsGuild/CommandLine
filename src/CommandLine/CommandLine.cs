@@ -27,11 +27,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             _logger.LogTrace("Parsing {@Args}", args);
             var result = Application.Parse(args);
 
-            if (result.SelectedCommand is IModelAccessor ma2 && ma2.GetModel() is RunApplicationState)
-            {
-                result.SelectedCommand = result.SelectedCommand.Parent;
-            }
-
             var parent = result.SelectedCommand;
             while (parent.Parent != null)
             {
@@ -66,7 +61,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             );
 
             var executor = new CommandLineExecutor(result.SelectedCommand, myState);
-            _commandLineBuilder.LinkExecutor(executor);
             return executor;
         }
 

@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
         <PackageReference Include="Rocket.Surgery.Builders.Abstractions" />
         <PackageReference Include="Rocket.Surgery.Conventions.Abstractions" />
     </ItemGroup>

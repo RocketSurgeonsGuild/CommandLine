@@ -8,7 +8,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public interface ICommandLine
     {
         CommandLineApplication Application { get; }
-
         ICommandLineExecutor Parse(params string[] args);
         int Execute(IServiceProvider serviceProvider, params string[] args);
     }

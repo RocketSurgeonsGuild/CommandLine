@@ -8,7 +8,6 @@ using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 using Rocket.Surgery.Builders;
 using Rocket.Surgery.Conventions;
 using Rocket.Surgery.Conventions.Reflection;
@@ -25,7 +24,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly CommandLineApplication<ApplicationState> _application;
-        private readonly CommandLineApplication<RunApplicationState> _run;
         private readonly DiagnosticSource _diagnosticSource;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
@@ -42,12 +40,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             {
                 ThrowOnUnexpectedArgument = false
             };
-            _run = _application.Command<RunApplicationState>("run", application =>
-            {
-                application.Description = "Run the application";
-                application.ExtendedHelpText = "Default action if no command is given";
-                application.ShowInHelpText = true;
-            });
 
             _diagnosticSource = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
             Logger = new DiagnosticLogger(diagnosticSource);
@@ -83,18 +75,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
         }
 
         public ILogger Logger { get; }
-        private IServiceCollection _serviceCollection;
+        //private IServiceCollection _serviceCollection;
 
         public ICommandLineBuilder WithService<S>(S value)
         {
             _services.Add((typeof(S), value));
             return this;
-        }
-
-        public ICommandLineBuilder ConnectToServices(IServiceCollection services)
-        {
-            _serviceCollection = services;
-            return OnParse(state => { services.AddSingleton(state); });
         }
 
         public ICommandLineBuilder OnRun(OnRunDelegate @delegate)
@@ -117,11 +103,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
         {
             _application.Model.OnParseDelegates.Add(@delegate);
             return this;
-        }
-
-        internal void LinkExecutor(ICommandLineExecutor executor)
-        {
-            _serviceCollection?.AddSingleton(executor);
         }
 
         public ICommandLine Build(Assembly entryAssembly = null)
