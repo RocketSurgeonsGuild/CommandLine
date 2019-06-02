@@ -5,7 +5,6 @@
     <ItemGroup>
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
-        <PackageReference Include="Rocket.Surgery.Builders.Abstractions" />
         <PackageReference Include="Rocket.Surgery.Conventions.Abstractions" />
     </ItemGroup>
 </Project>

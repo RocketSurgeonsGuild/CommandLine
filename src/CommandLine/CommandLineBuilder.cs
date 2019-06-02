@@ -8,7 +8,6 @@ using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Rocket.Surgery.Builders;
 using Rocket.Surgery.Conventions;
 using Rocket.Surgery.Conventions.Reflection;
 using Rocket.Surgery.Conventions.Scanners;
@@ -30,11 +29,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
             new List<(Type serviceType, object serviceValue)>();
 
         public CommandLineBuilder(
+            IRocketEnvironment environment,
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
             DiagnosticSource diagnosticSource,
-            IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
+            IDictionary<object, object> properties) : base(environment, scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
             _application = new CommandLineApplication<ApplicationState>()
             {
@@ -44,8 +44,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
             _diagnosticSource = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
             Logger = new DiagnosticLogger(diagnosticSource);
         }
-
-        protected override ICommandLineBuilder GetBuilder() => this;
 
         public IConventionBuilder CommandLineApplicationConventions => _application.Conventions;
 
