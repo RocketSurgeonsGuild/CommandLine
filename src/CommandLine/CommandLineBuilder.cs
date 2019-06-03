@@ -29,12 +29,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
             new List<(Type serviceType, object serviceValue)>();
 
         public CommandLineBuilder(
-            IRocketEnvironment environment,
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
             DiagnosticSource diagnosticSource,
-            IDictionary<object, object> properties) : base(environment, scanner, assemblyProvider, assemblyCandidateFinder, properties)
+            IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
             _application = new CommandLineApplication<ApplicationState>()
             {
