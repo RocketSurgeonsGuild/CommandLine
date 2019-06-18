@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Conventions;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
