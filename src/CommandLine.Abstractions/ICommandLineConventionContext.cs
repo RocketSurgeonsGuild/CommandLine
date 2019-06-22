@@ -16,6 +16,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         ICommandLineConventionContext AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true) where T : class;
         ICommandLineConventionContext OnParse(OnParseDelegate @delegate);
         ICommandLineConventionContext OnRun(OnRunDelegate @delegate);
+        ICommandLineConventionContext OnRun<T>() where T : IDefaultCommand;
         ICommandLineConventionContext WithService<S>(S value);
     }
 }

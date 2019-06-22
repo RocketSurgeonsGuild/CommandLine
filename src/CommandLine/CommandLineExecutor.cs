@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
@@ -28,7 +29,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return 0;
             }
 
-            
+
             var validationResult = Application.GetValidationResult();
             if (validationResult != ValidationResult.Success)
             {
@@ -37,6 +38,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
             if (Application is IModelAccessor ma && ma.GetModel() is ApplicationState state)
             {
+                if (state.OnRunType != null)
+                {
+                    var @default = serviceProvider.GetRequiredService(state.OnRunType) as IDefaultCommand;
+                    return @default.Run(state);
+                }
+
                 return state.OnRunDelegate?.Invoke(state) ?? int.MinValue;
             }
 

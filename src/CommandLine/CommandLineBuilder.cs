@@ -65,6 +65,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return this;
         }
 
+        ICommandLineConventionContext ICommandLineConventionContext.OnRun<T>()
+        {
+            OnRun<T>();
+            return this;
+        }
+
         ICommandLineConventionContext ICommandLineConventionContext.WithService<S>(S value)
         {
             WithService(value);
@@ -83,6 +89,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public ICommandLineBuilder OnRun(OnRunDelegate @delegate)
         {
             _application.Model.OnRunDelegate = @delegate;
+            _application.Model.OnRunType = null;
+            return this;
+        }
+
+        public ICommandLineBuilder OnRun<T>() where T : IDefaultCommand
+        {
+            _application.Model.OnRunType = typeof(T);
+            _application.Model.OnRunDelegate = null;
             return this;
         }
 

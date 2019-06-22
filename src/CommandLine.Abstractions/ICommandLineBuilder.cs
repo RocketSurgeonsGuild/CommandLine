@@ -12,13 +12,13 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// Interface ILoggingConvention
     /// </summary>
     /// TODO Edit XML Comment Template for ILoggingConvention
-    public interface ICommandLineBuilder : IConventionBuilder<ICommandLineBuilder, ICommandLineConvention,
-        CommandLineConventionDelegate>
+    public interface ICommandLineBuilder : IConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>
     {
         ICommandLineBuilder AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null,
             bool throwOnUnexpectedArg = true) where T : class;
         ICommandLineBuilder OnParse(OnParseDelegate @delegate);
         ICommandLineBuilder OnRun(OnRunDelegate @delegate);
+        ICommandLineBuilder OnRun<T>() where T : IDefaultCommand;
         ICommandLineBuilder WithService<S>(S value);
         ICommandLine Build(Assembly entryAssembly = null);
     }
