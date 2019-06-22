@@ -40,7 +40,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
             {
                 if (state.OnRunType != null)
                 {
-                    var @default = serviceProvider.GetRequiredService(state.OnRunType) as IDefaultCommand;
+                    var @default = ActivatorUtilities.CreateInstance(serviceProvider, state.OnRunType) as IDefaultCommand;
                     return @default.Run(state);
                 }
 
