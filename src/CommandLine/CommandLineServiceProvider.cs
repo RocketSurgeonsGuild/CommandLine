@@ -5,17 +5,31 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    /// <summary>
+    /// CommandLineServiceProvider.
+    /// Implements the <see cref="System.IServiceProvider" />
+    /// </summary>
+    /// <seealso cref="System.IServiceProvider" />
     class CommandLineServiceProvider : IServiceProvider
     {
         private readonly IModelAccessor _modelAccessor;
-        private readonly DefinedServices _services;
 
-        public CommandLineServiceProvider(IModelAccessor modelAccessor, DefinedServices services)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandLineServiceProvider"/> class.
+        /// </summary>
+        /// <param name="modelAccessor">The model accessor.</param>
+        /// <param name="services">The services.</param>
+        /// <exception cref="ArgumentNullException">services</exception>
+        public CommandLineServiceProvider(IModelAccessor modelAccessor)
         {
             _modelAccessor = modelAccessor;
-            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        /// <summary>
+        /// Gets the service object of the specified type.
+        /// </summary>
+        /// <param name="serviceType">An object that specifies the type of service object to get.</param>
+        /// <returns>A service object of type <paramref name="serviceType">serviceType</paramref>.   -or-  null if there is no service object of type <paramref name="serviceType">serviceType</paramref>.</returns>
         public object GetService(Type serviceType)
         {
             if (typeof(IApplicationState).IsAssignableFrom(serviceType))
@@ -28,12 +42,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                 return PhysicalConsole.Singleton;
             }
 
-            if (serviceType == typeof(DefinedServices))
-            {
-                return _services;
-            }
-
-            return _services.GetService(serviceType);
+            return null;
         }
     }
 }

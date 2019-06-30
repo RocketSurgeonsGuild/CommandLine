@@ -5,7 +5,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// Adds a help option of --help if no other help option is specified.
+    /// Implements the <see cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
     /// </summary>
+    /// <seealso cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
     public class DefaultHelpOptionConvention : IConvention
     {
         /// <summary>
@@ -13,6 +15,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// </summary>
         public const string DefaultHelpTemplate = "-?|-h|--help";
 
+        /// <summary>
+        /// Applies the specified context.
+        /// </summary>
+        /// <param name="context">The context.</param>
         /// <inheritdoc />
         public void Apply(ConventionContext context)
         {

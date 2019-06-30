@@ -19,6 +19,10 @@ using Xunit.Abstractions;
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
     public interface IService { int ReturnCode { get; } }
+    public interface IService2
+    {
+        string SomeValue { get; }
+    }
 
     public class CommandLineBuilderTests : AutoTestBase
     {
@@ -149,9 +153,9 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
             var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            var response = builder
-                .OnRun((state) => (int)state.GetLogLevel())
-                .Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+            (builder as ICommandLineConventionContext).OnRun((state) => (int)state.GetLogLevel());
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
 
             var result = (LogLevel)response.Execute(AutoFake.Resolve<IServiceProvider>(), command.Split(' '));
             result.Should().Be(level);
@@ -220,7 +224,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
 
             A.CallTo(() => serviceProvider.GetService(A<Type>.Ignored)).Returns(null);
             A.CallTo(() => serviceProvider.GetService(typeof(IService))).Returns(service).NumberOfTimes(2);
-            builder.OnRun((state) => 
+            builder.OnRun((state) =>
             {
                 state.GetLogLevel().Should().Be(LogLevel.Error);
                 return 1000;
@@ -359,6 +363,149 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
             response.Execute(new AutofacServiceProvider(AutoFake.Container), "cwv", "--api-domain", "mydomain.com",
                 "--origin", "origin1", "--origin", "origin2", "--client-name", "client1");
+        }
+
+        [Command("ServiceInjection")]
+        class ServiceInjection
+        {
+            private readonly IService2 _service2;
+
+            ServiceInjection(IService2 service2)
+            {
+                _service2 = service2;
+            }
+
+            public int OnExecute()
+            {
+                return _service2.SomeValue == "Service2" ? 0 : 1;
+            }
+        }
+
+        [Command]
+        class ServiceInjection2
+        {
+            private readonly IService2 _service2;
+
+            ServiceInjection2(IService2 service2)
+            {
+                _service2 = service2;
+            }
+
+            public int OnExecute()
+            {
+                return _service2.SomeValue == "Service2" ? 0 : 1;
+            }
+        }
+
+        [Fact]
+        public void Can_Add_A_Command_Without_A_Name()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+
+            var service = A.Fake<IService2>();
+            A.CallTo(() => service.SomeValue).Returns("Service2");
+            AutoFake.Provide(service);
+
+            builder.AddCommand<ServiceInjection>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "serviceinjection");
+
+            result.Should().Be(0);
+        }
+
+        [Fact]
+        public void Can_Add_A_Command_Without_A_Name_Using_Context()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var context = builder as ICommandLineConventionContext;
+
+            var service = A.Fake<IService2>();
+            A.CallTo(() => service.SomeValue).Returns("Service2");
+            AutoFake.Provide(service);
+
+            context.AddCommand<ServiceInjection>();
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "serviceinjection");
+
+            result.Should().Be(0);
+        }
+
+        [Fact]
+        public void Can_Add_A_Command_With_A_Name_Using_Context()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var context = builder as ICommandLineConventionContext;
+
+            var service = A.Fake<IService2>();
+            A.CallTo(() => service.SomeValue).Returns("Service2");
+            AutoFake.Provide(service);
+
+            context.AddCommand<ServiceInjection2>("si");
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "si");
+
+            result.Should().Be(0);
+        }
+
+        [Fact]
+        public void Should_Call_OnParse_Delegates()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var context = builder as ICommandLineConventionContext;
+
+            var onParseBuilder = A.Fake<OnParseDelegate>();
+            var onParseContext = A.Fake<OnParseDelegate>();
+
+            builder.OnParse(onParseBuilder);
+            context.OnParse(onParseContext);
+
+            var response = builder.Build(typeof(CommandLineBuilderTests).GetTypeInfo().Assembly);
+
+            var result = response.Execute(new AutofacServiceProvider(AutoFake.Container), "si");
+
+            A.CallTo(() => onParseBuilder(A<IApplicationState>._)).MustHaveHappened(1, Times.Exactly);
+            A.CallTo(() => onParseContext(A<IApplicationState>._)).MustHaveHappened(1, Times.Exactly);
+        }
+
+        class Default : IDefaultCommand
+        {
+            public int Run(IApplicationState state)
+            {
+                return -1;
+            }
+        }
+
+        [Fact]
+        public void Should_Call_Default_Command()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var context = builder as ICommandLineConventionContext;
+
+            var result = builder.OnRun<Default>().Build().Execute(new AutofacServiceProvider(AutoFake.Container));
+            result.Should().Be(-1);
+        }
+
+        [Fact]
+        public void Should_Call_Default_Command_Context()
+        {
+            AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
+            var builder = AutoFake.Resolve<CommandLineBuilder>();
+            var context = builder as ICommandLineConventionContext;
+
+            context.OnRun<Default>();
+            var result = builder.Build().Execute(new AutofacServiceProvider(AutoFake.Container));
+            result.Should().Be(-1);
         }
     }
 }

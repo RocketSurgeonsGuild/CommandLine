@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    /// <summary>
+    /// BackingFieldHelper.
+    /// </summary>
     public class BackingFieldHelper
     {
         private static FieldInfo GetBackingField(PropertyInfo pi)
@@ -37,6 +40,15 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return GetBackingField(property);
         }
 
+        /// <summary>
+        /// Gets the backing field.
+        /// </summary>
+        /// <typeparam name="TInterface">The type of the t interface.</typeparam>
+        /// <typeparam name="TValue">The type of the t value.</typeparam>
+        /// <param name="type">The type.</param>
+        /// <param name="expression">The expression.</param>
+        /// <returns>FieldInfo.</returns>
+        /// <exception cref="NotSupportedException">Given Expression is not supported</exception>
         public static FieldInfo GetBackingField<TInterface, TValue>(Type type, Expression<Func<TInterface, TValue>> expression)
         {
             if (expression.Body is MemberExpression exp)
@@ -46,6 +58,15 @@ namespace Rocket.Surgery.Extensions.CommandLine
             throw new NotSupportedException("Given Expression is not supported");
         }
 
+        /// <summary>
+        /// Sets the backing field.
+        /// </summary>
+        /// <typeparam name="TInterface">The type of the t interface.</typeparam>
+        /// <typeparam name="TValue">The type of the t value.</typeparam>
+        /// <param name="instance">The instance.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="value">The value.</param>
+        /// <exception cref="NotSupportedException">Given Expression is not supported</exception>
         public static void SetBackingField<TInterface, TValue>(TInterface instance, Expression<Func<TInterface, TValue>> expression, TValue value)
         {
             if (expression.Body is MemberExpression exp)
@@ -62,16 +83,26 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// Uses an instance of <see cref="IServiceProvider" /> to call constructors
     /// when creating models.
+    /// Implements the <see cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
     /// </summary>
+    /// <seealso cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
     public class ActivatorUtilitiesConvention : IConvention
     {
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ActivatorUtilitiesConvention"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
         public ActivatorUtilitiesConvention(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// Apply the convention.
+        /// </summary>
+        /// <param name="context">The context in which the convention is applied.</param>
         /// <inheritdoc />
         public virtual void Apply(ConventionContext context)
         {
@@ -202,10 +233,24 @@ namespace Rocket.Surgery.Extensions.CommandLine
         private static MethodInfo BindParametersMethod = typeof(ConventionContext).Assembly
             .GetType("McMaster.Extensions.CommandLineUtils.ReflectionHelper")
             .GetMethod("BindParameters", BindingFlags.Public | BindingFlags.Static);
+        /// <summary>
+        /// The ambiguous on execute method
+        /// </summary>
         public const string AmbiguousOnExecuteMethod = "Could not determine which 'OnExecute' or 'OnExecuteAsync' method to use. Multiple methods with this name were found";
+        /// <summary>
+        /// The no on execute method found
+        /// </summary>
         public const string NoOnExecuteMethodFound = "No method named 'OnExecute' or 'OnExecuteAsync' could be found";
+        /// <summary>
+        /// Invalids the type of the on execute return.
+        /// </summary>
+        /// <param name="methodName">Name of the method.</param>
+        /// <returns>System.String.</returns>
         public static string InvalidOnExecuteReturnType(string methodName) => methodName + " must have a return type of int or void, or if the method is async, Task<int> or Task.";
 
+        /// <summary>
+        /// The additional services property
+        /// </summary>
         internal static readonly PropertyInfo AdditionalServicesProperty =
             typeof(CommandLineApplication)
                 .GetRuntimeProperties()

@@ -3,8 +3,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    /// <summary>
+    /// ApplicationStateExtensions.
+    /// </summary>
     public static class ApplicationStateExtensions
     {
+        /// <summary>
+        /// Adds the state of the application.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="state">The state.</param>
+        /// <returns>IConfigurationBuilder.</returns>
         public static IConfigurationBuilder AddApplicationState(this IConfigurationBuilder  builder, IApplicationState state)
         {
             builder.AddInMemoryCollection(new Dictionary<string, string>

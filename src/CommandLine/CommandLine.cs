@@ -8,11 +8,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Rocket.Surgery.Extensions.CommandLine
 {
+    /// <summary>
+    /// CommandLine.
+    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.ICommandLine" />
+    /// </summary>
+    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.ICommandLine" />
     public class CommandLine : ICommandLine
     {
         private readonly CommandLineBuilder _commandLineBuilder;
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandLine"/> class.
+        /// </summary>
+        /// <param name="commandLineBuilder">The command line builder.</param>
+        /// <param name="application">The application.</param>
+        /// <param name="logger">The logger.</param>
         internal CommandLine(CommandLineBuilder commandLineBuilder, CommandLineApplication application, ILogger logger)
         {
             _commandLineBuilder = commandLineBuilder;
@@ -20,8 +31,17 @@ namespace Rocket.Surgery.Extensions.CommandLine
             Application = application;
         }
 
+        /// <summary>
+        /// Gets the application.
+        /// </summary>
+        /// <value>The application.</value>
         public CommandLineApplication Application { get; }
 
+        /// <summary>
+        /// Parses the specified arguments.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns>ICommandLineExecutor.</returns>
         public ICommandLineExecutor Parse(params string[] args)
         {
             _logger.LogTrace("Parsing {@Args}", args);
@@ -50,7 +70,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
                     result.SelectedCommand.FullName,
                     result.SelectedCommand.Name,
                     result.SelectedCommand.Description
-                }, 
+                },
                 new
                 {
                     myState.RemainingArguments,
@@ -64,6 +84,12 @@ namespace Rocket.Surgery.Extensions.CommandLine
             return executor;
         }
 
+        /// <summary>
+        /// Executes the specified service provider.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="args">The arguments.</param>
+        /// <returns>System.Int32.</returns>
         public int Execute(IServiceProvider serviceProvider, params string[] args)
         {
             _logger.LogTrace("Executing {@Args}", args);
