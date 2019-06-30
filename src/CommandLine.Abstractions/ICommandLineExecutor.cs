@@ -4,7 +4,7 @@ using McMaster.Extensions.CommandLineUtils;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
-    /// Interface ICommandLineExecutor
+    ///  ICommandLineExecutor
     /// </summary>
     public interface ICommandLineExecutor
     {

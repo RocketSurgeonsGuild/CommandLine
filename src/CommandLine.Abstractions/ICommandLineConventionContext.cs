@@ -9,7 +9,7 @@ using Rocket.Surgery.Conventions.Reflection;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
-    /// Interface ICommandLineConventionContext
+    ///  ICommandLineConventionContext
     /// Implements the <see cref="Rocket.Surgery.Conventions.IConventionContext" />
     /// </summary>
     /// <seealso cref="Rocket.Surgery.Conventions.IConventionContext" />

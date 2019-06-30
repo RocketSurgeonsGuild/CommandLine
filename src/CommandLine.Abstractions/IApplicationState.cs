@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
-    /// Interface IApplicationState
+    ///  IApplicationState
     /// </summary>
     public interface IApplicationState
     {

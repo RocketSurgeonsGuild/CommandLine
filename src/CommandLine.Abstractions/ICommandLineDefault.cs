@@ -16,7 +16,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public delegate void OnParseDelegate(IApplicationState state);
 
     /// <summary>
-    /// Interface IDefaultCommand
+    ///  IDefaultCommand
     /// </summary>
     public interface IDefaultCommand
     {

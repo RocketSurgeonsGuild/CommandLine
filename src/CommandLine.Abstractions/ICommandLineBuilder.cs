@@ -9,7 +9,7 @@ using Rocket.Surgery.Conventions.Scanners;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
-    /// Interface ILoggingConvention
+    ///  ILoggingConvention
     /// Implements the <see cref="Rocket.Surgery.Conventions.IConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />
     /// </summary>
     /// <seealso cref="Rocket.Surgery.Conventions.IConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />

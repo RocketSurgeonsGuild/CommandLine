@@ -6,7 +6,7 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
-    /// Interface ICommandLine
+    ///  ICommandLine
     /// </summary>
     public interface ICommandLine
     {

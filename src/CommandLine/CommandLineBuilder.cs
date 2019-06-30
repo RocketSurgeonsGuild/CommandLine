@@ -29,7 +29,6 @@ namespace Rocket.Surgery.Extensions.CommandLine
     public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly CommandLineApplication<ApplicationState> _application;
-        private readonly DiagnosticSource _diagnosticSource;
 
         private readonly List<(Type serviceType, object serviceValue)> _services =
             new List<(Type serviceType, object serviceValue)>();
@@ -47,16 +46,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
             IConventionScanner scanner,
             IAssemblyProvider assemblyProvider,
             IAssemblyCandidateFinder assemblyCandidateFinder,
-            DiagnosticSource diagnosticSource,
+            ILogger diagnosticSource,
             IDictionary<object, object> properties) : base(scanner, assemblyProvider, assemblyCandidateFinder, properties)
         {
             _application = new CommandLineApplication<ApplicationState>()
             {
                 ThrowOnUnexpectedArgument = false
             };
-
-            _diagnosticSource = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
-            Logger = new DiagnosticLogger(diagnosticSource);
+            Logger = diagnosticSource ?? throw new ArgumentNullException(nameof(diagnosticSource));
         }
 
         /// <summary>
@@ -186,7 +183,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         public ICommandLine Build(Assembly entryAssembly = null)
         {
             if (entryAssembly is null) entryAssembly = Assembly.GetEntryAssembly();
-            
+
             new ConventionComposer(Scanner)
                 .Register(
                     this,
