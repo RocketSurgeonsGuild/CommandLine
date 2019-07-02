@@ -4,8 +4,8 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     ///  ILoggingConvention
-    /// Implements the <see cref="Rocket.Surgery.Conventions.IConvention{Rocket.Surgery.Extensions.CommandLine.ICommandLineConventionContext}" />
+    /// Implements the <see cref="IConvention{ICommandLineConventionContext}" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Conventions.IConvention{Rocket.Surgery.Extensions.CommandLine.ICommandLineConventionContext}" />
+    /// <seealso cref="IConvention{ICommandLineConventionContext}" />
     public interface ICommandLineConvention : IConvention<ICommandLineConventionContext> { }
 }

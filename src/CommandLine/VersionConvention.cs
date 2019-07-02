@@ -5,9 +5,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// VersionConvention.
-    /// Implements the <see cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
+    /// Implements the <see cref="IConvention" />
     /// </summary>
-    /// <seealso cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
+    /// <seealso cref="IConvention" />
     class VersionConvention : IConvention
     {
         private readonly Assembly _entryAssembly;

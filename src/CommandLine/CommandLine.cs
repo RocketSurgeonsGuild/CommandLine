@@ -10,10 +10,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// CommandLine.
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.ICommandLine" />
+    /// Implements the <see cref="ICommandLine" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.ICommandLine" />
-    public class CommandLine : ICommandLine
+    /// <seealso cref="ICommandLine" />
+    class CommandLine : ICommandLine
     {
         private readonly CommandLineBuilder _commandLineBuilder;
         private readonly ILogger _logger;

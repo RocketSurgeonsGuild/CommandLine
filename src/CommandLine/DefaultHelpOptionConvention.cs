@@ -5,10 +5,10 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// Adds a help option of --help if no other help option is specified.
-    /// Implements the <see cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
+    /// Implements the <see cref="IConvention" />
     /// </summary>
-    /// <seealso cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
-    public class DefaultHelpOptionConvention : IConvention
+    /// <seealso cref="IConvention" />
+    class DefaultHelpOptionConvention : IConvention
     {
         /// <summary>
         /// The default help template.

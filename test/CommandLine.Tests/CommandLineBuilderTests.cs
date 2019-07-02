@@ -19,6 +19,7 @@ using Xunit.Abstractions;
 namespace Rocket.Surgery.Extensions.CommandLine.Tests
 {
     public interface IService { int ReturnCode { get; } }
+
     public interface IService2
     {
         string SomeValue { get; }
@@ -178,6 +179,7 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         [Command(),
          Subcommand(typeof(SubCmd))]
         class Cmd { public int OnExecute() => -1; }
+
         [Command("a")]
         class SubCmd { public int OnExecute() => -1; }
 

@@ -10,9 +10,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     ///  ILoggingConvention
-    /// Implements the <see cref="Rocket.Surgery.Conventions.IConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />
+    /// Implements the <see cref="IConventionBuilder{ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate}" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Conventions.IConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />
+    /// <seealso cref="IConventionBuilder{ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate}" />
     public interface ICommandLineBuilder : IConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>
     {
         /// <summary>
@@ -24,6 +24,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineBuilder AddCommand<T>(Action<CommandLineApplication<T>> action = null,
             bool throwOnUnexpectedArg = true) where T : class;
+
         /// <summary>
         /// Adds the command.
         /// </summary>
@@ -34,24 +35,28 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineBuilder AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null,
             bool throwOnUnexpectedArg = true) where T : class;
+
         /// <summary>
         /// Called when [parse].
         /// </summary>
         /// <param name="delegate">The delegate.</param>
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineBuilder OnParse(OnParseDelegate @delegate);
+
         /// <summary>
         /// Called when [run].
         /// </summary>
         /// <param name="delegate">The delegate.</param>
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineBuilder OnRun(OnRunDelegate @delegate);
+
         /// <summary>
         /// Called when [run].
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineBuilder OnRun<T>() where T : IDefaultCommand;
+
         /// <summary>
         /// Builds the specified entry assembly.
         /// </summary>

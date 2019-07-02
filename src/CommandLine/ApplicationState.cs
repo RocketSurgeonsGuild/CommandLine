@@ -11,9 +11,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// ApplicationState.
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.IApplicationState" />
+    /// Implements the <see cref="IApplicationState" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.IApplicationState" />
+    /// <seealso cref="IApplicationState" />
     [Command(ThrowOnUnexpectedArgument = false)]
     class ApplicationState : IApplicationState
     {
@@ -22,11 +22,13 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// </summary>
         /// <value>The on run delegate.</value>
         public OnRunDelegate OnRunDelegate { get; set; }
+
         /// <summary>
         /// Gets or sets the type of the on run.
         /// </summary>
         /// <value>The type of the on run.</value>
         public Type OnRunType { get; set; }
+
         /// <summary>
         /// Gets or sets the on parse delegates.
         /// </summary>

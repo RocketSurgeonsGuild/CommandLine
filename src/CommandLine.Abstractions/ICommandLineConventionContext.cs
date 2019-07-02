@@ -10,9 +10,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     ///  ICommandLineConventionContext
-    /// Implements the <see cref="Rocket.Surgery.Conventions.IConventionContext" />
+    /// Implements the <see cref="IConventionContext" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Conventions.IConventionContext" />
+    /// <seealso cref="IConventionContext" />
     public interface ICommandLineConventionContext : IConventionContext
     {
         /// <summary>
@@ -20,16 +20,19 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// </summary>
         /// <value>The assembly provider.</value>
         IAssemblyProvider AssemblyProvider { get; }
+
         /// <summary>
         /// Gets the assembly candidate finder.
         /// </summary>
         /// <value>The assembly candidate finder.</value>
         IAssemblyCandidateFinder AssemblyCandidateFinder { get; }
+
         /// <summary>
         /// Gets the command line application conventions.
         /// </summary>
         /// <value>The command line application conventions.</value>
         IConventionBuilder CommandLineApplicationConventions { get; }
+
         /// <summary>
         /// Adds the command.
         /// </summary>
@@ -38,6 +41,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// <param name="throwOnUnexpectedArg">if set to <c>true</c> [throw on unexpected argument].</param>
         /// <returns>ICommandLineBuilder.</returns>
         ICommandLineConventionContext AddCommand<T>(Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true) where T : class;
+
         /// <summary>
         /// Adds the command.
         /// </summary>
@@ -47,18 +51,21 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// <param name="throwOnUnexpectedArg">if set to <c>true</c> [throw on unexpected argument].</param>
         /// <returns>ICommandLineConventionContext.</returns>
         ICommandLineConventionContext AddCommand<T>(string name, Action<CommandLineApplication<T>> action = null, bool throwOnUnexpectedArg = true) where T : class;
+
         /// <summary>
         /// Called when [parse].
         /// </summary>
         /// <param name="delegate">The delegate.</param>
         /// <returns>ICommandLineConventionContext.</returns>
         ICommandLineConventionContext OnParse(OnParseDelegate @delegate);
+
         /// <summary>
         /// Called when [run].
         /// </summary>
         /// <param name="delegate">The delegate.</param>
         /// <returns>ICommandLineConventionContext.</returns>
         ICommandLineConventionContext OnRun(OnRunDelegate @delegate);
+
         /// <summary>
         /// Called when [run].
         /// </summary>

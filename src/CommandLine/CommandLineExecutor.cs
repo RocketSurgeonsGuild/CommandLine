@@ -11,9 +11,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// CommandLineExecutor.
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineExecutor" />
+    /// Implements the <see cref="ICommandLineExecutor" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineExecutor" />
+    /// <seealso cref="ICommandLineExecutor" />
     class CommandLineExecutor : ICommandLineExecutor
     {
         /// <summary>
@@ -33,11 +33,13 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// </summary>
         /// <value>The application.</value>
         public CommandLineApplication Application { get; }
+
         /// <summary>
         /// Gets the state of the application.
         /// </summary>
         /// <value>The state of the application.</value>
         public IApplicationState ApplicationState { get; }
+
         /// <summary>
         /// Gets a value indicating whether this instance is default command.
         /// </summary>

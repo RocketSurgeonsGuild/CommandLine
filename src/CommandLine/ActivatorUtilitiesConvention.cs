@@ -14,7 +14,7 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// BackingFieldHelper.
     /// </summary>
-    public class BackingFieldHelper
+    class BackingFieldHelper
     {
         private static FieldInfo GetBackingField(PropertyInfo pi)
         {
@@ -83,9 +83,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
     /// <summary>
     /// Uses an instance of <see cref="IServiceProvider" /> to call constructors
     /// when creating models.
-    /// Implements the <see cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
+    /// Implements the <see cref="IConvention" />
     /// </summary>
-    /// <seealso cref="McMaster.Extensions.CommandLineUtils.Conventions.IConvention" />
+    /// <seealso cref="IConvention" />
     public class ActivatorUtilitiesConvention : IConvention
     {
         private readonly IServiceProvider _serviceProvider;
@@ -233,14 +233,17 @@ namespace Rocket.Surgery.Extensions.CommandLine
         private static MethodInfo BindParametersMethod = typeof(ConventionContext).Assembly
             .GetType("McMaster.Extensions.CommandLineUtils.ReflectionHelper")
             .GetMethod("BindParameters", BindingFlags.Public | BindingFlags.Static);
+
         /// <summary>
         /// The ambiguous on execute method
         /// </summary>
         public const string AmbiguousOnExecuteMethod = "Could not determine which 'OnExecute' or 'OnExecuteAsync' method to use. Multiple methods with this name were found";
+
         /// <summary>
         /// The no on execute method found
         /// </summary>
         public const string NoOnExecuteMethodFound = "No method named 'OnExecute' or 'OnExecuteAsync' could be found";
+
         /// <summary>
         /// Invalids the type of the on execute return.
         /// </summary>

@@ -30,9 +30,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 
     /// <summary>
     /// OnRunDefaultCommand.
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.IDefaultCommand" />
+    /// Implements the <see cref="IDefaultCommand" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.IDefaultCommand" />
+    /// <seealso cref="IDefaultCommand" />
     class OnRunDefaultCommand : IDefaultCommand
     {
         private readonly OnRunDelegate @delegate;

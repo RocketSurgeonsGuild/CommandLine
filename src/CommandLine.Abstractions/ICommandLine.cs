@@ -15,12 +15,14 @@ namespace Rocket.Surgery.Extensions.CommandLine
         /// </summary>
         /// <value>The application.</value>
         CommandLineApplication Application { get; }
+
         /// <summary>
         /// Parses the specified arguments.
         /// </summary>
         /// <param name="args">The arguments.</param>
         /// <returns>ICommandLineExecutor.</returns>
         ICommandLineExecutor Parse(params string[] args);
+
         /// <summary>
         /// Executes the specified service provider.
         /// </summary>

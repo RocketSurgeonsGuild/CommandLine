@@ -7,9 +7,9 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// CommandLineServiceProvider.
-    /// Implements the <see cref="System.IServiceProvider" />
+    /// Implements the <see cref="IServiceProvider" />
     /// </summary>
-    /// <seealso cref="System.IServiceProvider" />
+    /// <seealso cref="IServiceProvider" />
     class CommandLineServiceProvider : IServiceProvider
     {
         private readonly IModelAccessor _modelAccessor;
