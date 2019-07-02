@@ -56,16 +56,16 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             a.Should().NotThrow();
         }
 
-        [Command(), Subcommand("add", typeof(Add))]
+        [Command("remote"), Subcommand(typeof(Add))]
         class Remote { public int OnExecute() => 1; }
 
-        [Command()]
+        [Command("add")]
         class Add { public int OnExecute() => 1; }
 
-        [Command(), Subcommand("origin", typeof(Origin))]
+        [Command("fetch"), Subcommand(typeof(Origin))]
         class Fetch { public int OnExecute() => 2; }
 
-        [Command()]
+        [Command("origin")]
         class Origin { public int OnExecute() => 2; }
 
         [Fact]
@@ -74,8 +74,8 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
             AutoFake.Provide<IAssemblyProvider>(new TestAssemblyProvider());
             var builder = AutoFake.Resolve<CommandLineBuilder>();
 
-            builder.AddCommand<Remote>("remote");
-            builder.AddCommand<Fetch>("fetch");
+            builder.AddCommand<Remote>();
+            builder.AddCommand<Fetch>();
 
             var response = builder.Build();
 
@@ -176,8 +176,9 @@ namespace Rocket.Surgery.Extensions.CommandLine.Tests
         }
 
         [Command(),
-         Subcommand("a", typeof(SubCmd))]
+         Subcommand(typeof(SubCmd))]
         class Cmd { public int OnExecute() => -1; }
+        [Command("a")]
         class SubCmd { public int OnExecute() => -1; }
 
         [Theory]

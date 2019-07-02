@@ -19,13 +19,11 @@ namespace Rocket.Surgery.Extensions.CommandLine
 {
     /// <summary>
     /// Logging Builder
-    /// Implements the <see cref="Rocket.Surgery.Conventions.ConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder" />
-    /// Implements the <see cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineConventionContext" />
+    /// Implements the <see cref="ICommandLineBuilder" />
+    /// Implements the <see cref="ICommandLineConventionContext" />
     /// </summary>
-    /// <seealso cref="Rocket.Surgery.Conventions.ConventionBuilder{Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder, Rocket.Surgery.Extensions.CommandLine.ICommandLineConvention, Rocket.Surgery.Extensions.CommandLine.CommandLineConventionDelegate}" />
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineBuilder" />
-    /// <seealso cref="Rocket.Surgery.Extensions.CommandLine.ICommandLineConventionContext" />
+    /// <seealso cref="ICommandLineBuilder" />
+    /// <seealso cref="ICommandLineConventionContext" />
     public class CommandLineBuilder : ConventionBuilder<ICommandLineBuilder, ICommandLineConvention, CommandLineConventionDelegate>, ICommandLineBuilder, ICommandLineConventionContext
     {
         private readonly CommandLineApplication<ApplicationState> _application;
