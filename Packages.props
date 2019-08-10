@@ -33,8 +33,8 @@
   <ItemGroup>
     <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="4.4.0" />
     <PackageReference Update="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Update="Rocket.Surgery.Conventions" Version="6.3.0" />
-    <PackageReference Update="Rocket.Surgery.Conventions.Abstractions" Version="6.3.0" />
+    <PackageReference Update="Rocket.Surgery.Conventions" Version="6.3.1" />
+    <PackageReference Update="Rocket.Surgery.Conventions.Abstractions" Version="6.3.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Rocket.Surgery.Extensions.Testing" Version="1.1.13" />
